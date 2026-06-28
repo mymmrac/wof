@@ -41,6 +41,8 @@ func HashPassword(password string) (string, error) {
 
 // ComparePasswordAndHash verifies password against the PHC-style encoded hash.
 // needsRehash == true if the stored hash uses weaker params than current defaults.
+//
+//nolint:funlen
 func ComparePasswordAndHash(password, encodedHash string) (match bool, needsRehash bool, err error) {
 	parts := strings.Split(encodedHash, "$")
 	// Expected parts: ["", "argon2id", "v=19", "m=...,t=...,p=...", "salt", "hash"]
@@ -65,8 +67,7 @@ func ComparePasswordAndHash(password, encodedHash string) (match bool, needsReha
 	var mem uint32
 	var time uint32
 	var threads uint8
-	params := strings.Split(parts[3], ",")
-	for _, p := range params {
+	for p := range strings.SplitSeq(parts[3], ",") {
 		kv := strings.SplitN(p, "=", 2)
 		if len(kv) != 2 {
 			return false, false, errors.New("invalid params")

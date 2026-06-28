@@ -7,10 +7,12 @@ import (
 	"go.uber.org/zap"
 )
 
-const ctxLoggerKey = "_logger"
+var loggerKey = loggerKeyType{} //nolint:gochecknoglobals
+
+type loggerKeyType struct{}
 
 func FromContext(ctx context.Context) *zap.SugaredLogger {
-	log, ok := ctx.Value(ctxLoggerKey).(*zap.SugaredLogger)
+	log, ok := ctx.Value(loggerKey).(*zap.SugaredLogger)
 	if !ok || log == nil {
 		return DefaultLogger.Load()
 	}
@@ -18,11 +20,13 @@ func FromContext(ctx context.Context) *zap.SugaredLogger {
 }
 
 func ToContext(ctx context.Context, log *zap.SugaredLogger) context.Context {
-	return context.WithValue(ctx, ctxLoggerKey, log)
+	return context.WithValue(ctx, loggerKey, log)
 }
 
+//nolint:gochecknoglobals
 var DefaultLogger = atomic.NewPointer[zap.SugaredLogger](zap.NewNop().Sugar())
 
+//nolint:gochecknoglobals
 var skipOne = zap.AddCallerSkip(1)
 
 func Debugw(ctx context.Context, msg string, fields ...any) {

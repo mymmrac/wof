@@ -40,10 +40,13 @@ func init() { //nolint:gochecknoinits
 				mac = rand.Text()
 			}
 
+			pidBuf := make([]byte, binary.MaxVarintLen64)
+			binary.PutVarint(pidBuf, int64(os.Getppid()))
+
 			hash := sha256.New()
 			_, _ = hash.Write([]byte(mac))
 			_, _ = hash.Write([]byte(hostname))
-			_, _ = hash.Write([]byte{byte(os.Getpid())})
+			_, _ = hash.Write(pidBuf)
 			sum := hash.Sum(nil)
 
 			return binary.BigEndian.Uint16(sum[:2]), nil
@@ -63,7 +66,6 @@ func New() ID {
 	if err != nil {
 		panic(fmt.Errorf("unreacheble: %w", err))
 	}
-	//nolint:gosec
 	return ID(id & math.MaxInt64) // Ensure the ID is not negative
 }
 

@@ -227,7 +227,7 @@ func (r *repository) GetByID(_ context.Context, id id.ID) (*Model, bool, error) 
 	if err := r.db.View(func(tx *bolt.Tx) error {
 		itemBucket, err := r.getItemBucket(tx, id)
 		if err != nil {
-			return nil
+			return nil //nolint:nilerr
 		}
 
 		data := itemBucket.Get([]byte("model"))
@@ -258,7 +258,7 @@ func (r *repository) GetImageByID(_ context.Context, id id.ID) ([]byte, bool, er
 	if err := r.db.View(func(tx *bolt.Tx) error {
 		itemBucket, err := r.getItemBucket(tx, id)
 		if err != nil {
-			return nil
+			return nil //nolint:nilerr
 		}
 
 		data := itemBucket.Get([]byte("image"))

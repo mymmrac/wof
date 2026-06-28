@@ -157,7 +157,7 @@ func hashPassword(_ context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return fmt.Errorf("hash password: %w", err)
 	}
-	fmt.Println(hash)
+	_, _ = fmt.Fprintln(cmd.Writer, hash)
 	return nil
 }
 
