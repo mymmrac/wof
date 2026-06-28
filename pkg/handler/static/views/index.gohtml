@@ -1,8 +1,8 @@
-<main class="glass-effect rounded-3xl p-12 shadow-2xl">
+<main class="glass-effect rounded-xl p-12 mx-auto shadow-2xl max-w-lg w-full">
     <!-- Hero Section -->
     <div class="text-center mb-12">
         <div class="floating-animation mb-8">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg pulse-glow">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl shadow-lg pulse-glow">
                 <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -10,28 +10,32 @@
             </div>
         </div>
 
-        <h1 class="text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6 leading-tight">
+        <h1 class="text-5xl font-extrabold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent mb-6 leading-tight tracking-tight">
             Wheel of Fortune
         </h1>
+        <div class="h-px w-24 mx-auto bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
     </div>
 
     <!-- Login Form -->
-    <form x-data="loginForm()" @submit.prevent="await login()">
+    <form x-data="loginForm()" @submit.prevent="await login()" class="space-y-8">
         <div class="space-y-6">
             <div class="space-y-2">
-                <label for="login-password" class="text-sm font-semibold text-gray-700 block">Password</label>
-                <input x-model="password" type="password" id="login-password" placeholder="Enter password"
-                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50">
+                <label for="login-password" class="text-xs font-bold uppercase tracking-wider text-gray-400 block px-1">Security Key</label>
+                <input x-model="password" type="password" id="login-password" placeholder="••••••••"
+                       class="w-full px-4 py-3 border border-white/10 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-black/20 text-white placeholder-gray-600">
             </div>
 
             <p x-show="error" x-text="error"
-               class="text-red-500 text-sm bg-red-50 p-3 rounded-lg"></p>
+               class="text-red-400 text-sm bg-red-950/30 border border-red-500/20 p-3 rounded-lg"></p>
         </div>
 
-        <div class="mt-8 flex gap-4">
+        <div class="pt-2">
             <button type="submit"
-                    class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold cursor-pointer">
-                Sign In
+                    class="w-full px-6 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg hover:shadow-blue-500/20 transform hover:-translate-y-0.5 transition-all duration-200 font-bold tracking-wide cursor-pointer flex items-center justify-center gap-2 group">
+                Access
+                <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
             </button>
         </div>
     </form>
