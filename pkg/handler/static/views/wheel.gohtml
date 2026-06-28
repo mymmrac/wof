@@ -1,4 +1,5 @@
-<main x-data="wheelComponent()" x-init="await loadWheel(); await loadItems()" class="glass-effect rounded-xl p-8 shadow-2xl">
+<main x-data="wheelComponent()" x-init="await loadWheel(); await loadItems()"
+      class="glass-effect rounded-xl p-8 shadow-2xl">
     <!-- Header Section -->
     <div class="flex justify-between items-end mb-8 pb-6 border-b border-white/5">
         <div>
@@ -103,15 +104,16 @@
                     <!-- The Wheel SVG -->
                     <div class="w-full h-full transform transition-transform duration-[4000ms] ease-[cubic-bezier(0.1,0,0.1,1)]"
                          :style="`transform: rotate(${rotation}deg)`">
-                        <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible" id="fortune-wheel" xmlns="http://www.w3.org/2000/svg"
+                        <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible" id="fortune-wheel"
+                             xmlns="http://www.w3.org/2000/svg"
                              x-html="renderWheel()">
                         </svg>
                     </div>
-                    
+
                     <!-- Pointer -->
                     <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 w-4 h-8 text-blue-500">
                         <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 21l-8-18h16l-8 18z" />
+                            <path d="M12 21l-8-18h16l-8 18z"/>
                         </svg>
                     </div>
                 </div>
@@ -123,11 +125,12 @@
                         <span x-show="spinning">Spinning...</span>
                     </button>
 
-                    <button @click="prepareWheel()" x-show="!spinning && selectedItem"
+                    <button @click="selectedItem = null; prepareWheel()" x-show="!spinning && selectedItem"
                             class="p-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-full border border-white/10 transition-all duration-300 cursor-pointer"
                             title="Refresh Wheel">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
                     </button>
                 </div>
@@ -138,11 +141,12 @@
                 <div class="space-y-6">
                     <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
                         <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
                         </svg>
                         Wheel Settings
                     </h2>
-                    
+
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
                             <label class="text-xs font-bold uppercase tracking-wider text-gray-500 block px-1">Sectors</label>
@@ -158,19 +162,23 @@
                                 <input type="checkbox" x-model="filterExcludeUsed" class="hidden">
                                 <div class="w-5 h-5 rounded border border-white/10 flex items-center justify-center transition-colors group-hover:border-blue-500"
                                      :class="filterExcludeUsed ? 'bg-blue-600 border-blue-600' : 'bg-black/20'">
-                                    <svg x-show="filterExcludeUsed" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    <svg x-show="filterExcludeUsed" class="w-3 h-3 text-white" fill="none"
+                                         stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                              d="M5 13l4 4L19 7"/>
                                     </svg>
                                 </div>
                                 <span class="text-sm font-medium text-gray-400 group-hover:text-gray-200">Exclude Used</span>
                             </label>
-                            
+
                             <label class="flex items-center gap-2 cursor-pointer group">
                                 <input type="checkbox" x-model="filterExcludeRejected" class="hidden">
                                 <div class="w-5 h-5 rounded border border-white/10 flex items-center justify-center transition-colors group-hover:border-blue-500"
                                      :class="filterExcludeRejected ? 'bg-blue-600 border-blue-600' : 'bg-black/20'">
-                                    <svg x-show="filterExcludeRejected" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    <svg x-show="filterExcludeRejected" class="w-3 h-3 text-white" fill="none"
+                                         stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                              d="M5 13l4 4L19 7"/>
                                     </svg>
                                 </div>
                                 <span class="text-sm font-medium text-gray-400 group-hover:text-gray-200">Exclude Rejected</span>
@@ -180,7 +188,8 @@
                 </div>
 
                 <!-- Selected Item Controls -->
-                <div x-show="selectedItem" x-transition class="glass-effect rounded-xl p-6 border border-blue-500/20 bg-blue-500/5">
+                <div x-show="selectedItem" x-transition
+                     class="glass-effect rounded-xl p-6 border border-blue-500/20 bg-blue-500/5">
                     <div class="flex items-center gap-4 mb-6">
                         <div class="w-16 h-16 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex-shrink-0">
                             <img :src="selectedItem ? `/api/wheel/${wheelId}/item/${selectedItem.id}/image?v=${imageVersions[selectedItem.id] || 0}` : ''"
@@ -188,7 +197,8 @@
                         </div>
                         <div>
                             <h3 class="text-2xl font-black text-white" x-text="selectedItem?.name"></h3>
-                            <p class="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Winning Selection</p>
+                            <p class="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Winning
+                                Selection</p>
                         </div>
                     </div>
 
@@ -499,135 +509,138 @@
             selectedItem: null,
 
             init() {
-                this.$watch('sectorCount', () => this.prepareWheel());
-                this.$watch('filterExcludeUsed', () => this.prepareWheel());
-                this.$watch('filterExcludeRejected', () => this.prepareWheel());
-                this.$watch('items', () => this.prepareWheel());
+                this.$watch("sectorCount", () => this.prepareWheel())
+                this.$watch("filterExcludeUsed", () => this.prepareWheel())
+                this.$watch("filterExcludeRejected", () => this.prepareWheel())
+                this.$watch("items", () => this.prepareWheel())
             },
 
             prepareWheel() {
-                if (this.spinning || this.justFinishedSpinning) return;
-                
+                if (this.spinning || this.justFinishedSpinning || this.selectedItem) return
+
                 let availableItems = (this.items || []).filter(item => {
-                    if (this.filterExcludeUsed && item.used) return false;
-                    if (this.filterExcludeRejected && item.rejected) return false;
-                    return true;
-                });
+                    if (this.filterExcludeUsed && item.used) return false
+                    if (this.filterExcludeRejected && item.rejected) return false
+                    return true
+                })
 
                 if (availableItems.length === 0) {
-                    this.wheelSectors = [];
-                    return;
+                    this.wheelSectors = []
+                    return
                 }
 
                 // Shuffle and pick items for sectors
-                let sectors = [];
-                let pool = [...availableItems].sort(() => Math.random() - 0.5);
-                
-                const count = parseInt(this.sectorCount) || 8;
+                let sectors = []
+                let pool = [ ...availableItems ].sort(() => Math.random() - 0.5)
+
+                const count = parseInt(this.sectorCount) || 8
                 for (let i = 0; i < count; i++) {
-                    sectors.push(pool[i % pool.length]);
+                    sectors.push(pool[i % pool.length])
                 }
-                this.wheelSectors = sectors;
-                this.selectedSectorIndex = null;
-                this.selectedItem = null;
+                this.wheelSectors = sectors
+                this.selectedSectorIndex = null
+                this.selectedItem = null
             },
 
             async spin() {
-                if (this.spinning || this.wheelSectors.length === 0) return;
+                if (this.spinning) return
+                this.selectedItem = null
+                this.prepareWheel()
+                if (this.wheelSectors.length === 0) return
 
-                this.spinning = true;
-                this.selectedItem = null;
-                this.selectedSectorIndex = null;
+                this.spinning = true
+                this.selectedItem = null
+                this.selectedSectorIndex = null
 
-                const sectorAngle = 360 / this.wheelSectors.length;
-                const randomSectors = Math.floor(Math.random() * this.wheelSectors.length);
-                const extraSpins = 5 + Math.floor(Math.random() * 5);
-                
+                const sectorAngle = 360 / this.wheelSectors.length
+                const randomSectors = Math.floor(Math.random() * this.wheelSectors.length)
+                const extraSpins = 5 + Math.floor(Math.random() * 5)
+
                 // Calculate new rotation. 
                 // Target angle should be such that the pointer (at 0 degrees/top) points to the selected sector.
                 // The wheel rotates clockwise. Sector 0 is from 0 to sectorAngle.
                 // To point at sector `randomSectors`, we need to rotate by `-(randomSectors + 0.5) * sectorAngle`
                 // But we add it to current rotation to keep it smooth.
-                
-                const normalizedRotation = this.rotation % 360;
-                this.rotation = this.rotation - normalizedRotation + (extraSpins * 360) + (360 - (randomSectors + 0.5) * sectorAngle);
+
+                const normalizedRotation = this.rotation % 360
+                this.rotation = this.rotation - normalizedRotation + (extraSpins * 360) + (360 - (randomSectors + 0.5) * sectorAngle)
 
                 setTimeout(async () => {
-                    this.spinning = false;
-                    this.justFinishedSpinning = true;
-                    this.selectedSectorIndex = randomSectors;
-                    this.selectedItem = this.wheelSectors[randomSectors];
-                    
+                    this.spinning = false
+                    this.justFinishedSpinning = true
+                    this.selectedSectorIndex = randomSectors
+                    this.selectedItem = this.wheelSectors[randomSectors]
+
                     // Automatically mark as used
                     if (!this.selectedItem.used) {
-                        await this.toggleUsed(this.selectedItem);
+                        await this.toggleUsed(this.selectedItem)
                     }
-                    this.justFinishedSpinning = false;
-                }, 4000);
+                    this.justFinishedSpinning = false
+                }, 4000)
             },
 
             renderWheel() {
-                let html = '<circle cx="50" cy="50" r="48" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" />';
-                
-                if (this.wheelSectors.length > 0) {
-                    const sectorAngle = 360 / this.wheelSectors.length;
-                    for (let index = 0; index < this.wheelSectors.length; index++) {
-                        const startAngle = index * sectorAngle;
-                        const endAngle = (index + 1) * sectorAngle;
-                        const d = this.describeArc(50, 50, 46, startAngle, endAngle);
-                        
-                        const fill = index === this.selectedSectorIndex ? 'rgba(59, 130, 246, 0.4)' : (index % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)');
-                        
-                        const textX = this.getTextX(50, 25, (index + 0.5) * sectorAngle);
-                        const textY = this.getTextY(50, 25, (index + 0.5) * sectorAngle);
+                let html = "<circle cx=\"50\" cy=\"50\" r=\"48\" fill=\"rgba(255,255,255,0.03)\" stroke=\"rgba(255,255,255,0.1)\" stroke-width=\"0.5\" />"
 
-                        const imageX = this.getTextX(50, 38, (index + 0.5) * sectorAngle);
-                        const imageY = this.getTextY(50, 38, (index + 0.5) * sectorAngle);
-                        
-                        const sector = this.wheelSectors[index];
-                        let name = '';
+                if (this.wheelSectors.length > 0) {
+                    const sectorAngle = 360 / this.wheelSectors.length
+                    for (let index = 0; index < this.wheelSectors.length; index++) {
+                        const startAngle = index * sectorAngle
+                        const endAngle = (index + 1) * sectorAngle
+                        const d = this.describeArc(50, 50, 46, startAngle, endAngle)
+
+                        const fill = index === this.selectedSectorIndex ? "rgba(59, 130, 246, 0.4)" : (index % 2 === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.02)")
+
+                        const textX = this.getTextX(50, 25, (index + 0.5) * sectorAngle)
+                        const textY = this.getTextY(50, 25, (index + 0.5) * sectorAngle)
+
+                        const imageX = this.getTextX(50, 38, (index + 0.5) * sectorAngle)
+                        const imageY = this.getTextY(50, 38, (index + 0.5) * sectorAngle)
+
+                        const sector = this.wheelSectors[index]
+                        let name = ""
                         if (sector && sector.name) {
-                            name = sector.name.length > 15 ? sector.name.substring(0, 12) + '...' : sector.name;
+                            name = sector.name.length > 15 ? sector.name.substring(0, 12) + "..." : sector.name
                         }
 
-                        const rotation = (index + 0.5) * sectorAngle;
-                        const imageUrl = `/api/wheel/${this.wheelId}/item/${sector.id}/image?v=${this.imageVersions[sector.id] || 0}`;
+                        const rotation = (index + 0.5) * sectorAngle
+                        const imageUrl = `/api/wheel/${ this.wheelId }/item/${ sector.id }/image?v=${ this.imageVersions[sector.id] || 0 }`
 
                         html += `
                             <g>
-                                <path d="${d}" fill="${fill}" class="transition-colors duration-300" stroke="rgba(255,255,255,0.2)" stroke-width="0.5" />
-                                <g transform="rotate(${rotation}, ${imageX}, ${imageY})">
-                                    <image href="${imageUrl}" x="${imageX - 4}" y="${imageY - 4}" width="8" height="8" />
+                                <path d="${ d }" fill="${ fill }" class="transition-colors duration-300" stroke="rgba(255,255,255,0.2)" stroke-width="0.5" />
+                                <g transform="rotate(${ rotation }, ${ imageX }, ${ imageY })">
+                                    <image href="${ imageUrl }" x="${ imageX - 4 }" y="${ imageY - 4 }" width="8" height="8" />
                                 </g>
-                                <text x="${textX}" y="${textY}" fill="white" font-size="2.5" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(${rotation}, ${textX}, ${textY})">
-                                    ${name}
+                                <text x="${ textX }" y="${ textY }" fill="white" font-size="2.5" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(${ rotation }, ${ textX }, ${ textY })">
+                                    ${ name }
                                 </text>
                             </g>
-                        `;
+                        `
                     }
                 } else {
                     html += `
                         <text x="50" y="50" fill="rgba(255,255,255,0.3)" font-size="4" font-weight="bold" text-anchor="middle" dominant-baseline="middle">
                             No items left
                         </text>
-                    `;
+                    `
                 }
-                
-                return html;
+
+                return html
             },
 
             polarToCartesian(centerX, centerY, radius, angleInDegrees) {
-                const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+                const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0
                 return {
                     x: centerX + (radius * Math.cos(angleInRadians)),
-                    y: centerY + (radius * Math.sin(angleInRadians))
-                };
+                    y: centerY + (radius * Math.sin(angleInRadians)),
+                }
             },
 
             describeArc(x, y, radius, startAngle, endAngle) {
                 if (isNaN(startAngle) || isNaN(endAngle)) {
-                    console.error('Invalid angles for describeArc:', startAngle, endAngle);
-                    return "";
+                    console.error("Invalid angles for describeArc:", startAngle, endAngle)
+                    return ""
                 }
                 // For a full circle (shouldn't happen with sectors but for safety)
                 if (endAngle - startAngle >= 359.9) {
@@ -635,27 +648,27 @@
                         "M", x, y - radius,
                         "A", radius, radius, 0, 1, 1, x, y + radius,
                         "A", radius, radius, 0, 1, 1, x, y - radius,
-                        "Z"
-                    ].join(" ");
+                        "Z",
+                    ].join(" ")
                 }
-                const start = this.polarToCartesian(x, y, radius, endAngle);
-                const end = this.polarToCartesian(x, y, radius, startAngle);
-                const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+                const start = this.polarToCartesian(x, y, radius, endAngle)
+                const end = this.polarToCartesian(x, y, radius, startAngle)
+                const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1"
                 return [
                     "M", x, y,
                     "L", start.x, start.y,
                     "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
                     "L", x, y,
-                    "Z"
-                ].join(" ");
+                    "Z",
+                ].join(" ")
             },
 
             getTextX(x, radius, angle) {
-                return this.polarToCartesian(x, x, radius, angle).x;
+                return this.polarToCartesian(x, x, radius, angle).x
             },
 
             getTextY(y, radius, angle) {
-                return this.polarToCartesian(y, y, radius, angle).y;
+                return this.polarToCartesian(y, y, radius, angle).y
             },
 
             async loadWheel() {
@@ -664,11 +677,11 @@
 
             async loadItems() {
                 try {
-                    const response = await fetch(`/api/wheel/${ this.wheelId }/item`);
-                    if (!response.ok) throw new Error('Failed to load items');
-                    this.items = await response.json();
+                    const response = await fetch(`/api/wheel/${ this.wheelId }/item`)
+                    if (!response.ok) throw new Error("Failed to load items")
+                    this.items = await response.json()
                 } catch (e) {
-                    console.error('Error loading items:', e);
+                    console.error("Error loading items:", e)
                 }
             },
 
