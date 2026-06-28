@@ -29,6 +29,7 @@ func RegisterHandlers(router fiber.Router, itemRepository item.Repository) {
 	api.Get("/", h.getAllHandler)
 	api.Post("/", h.createHandler)
 	api.Put("/order", h.updateItemOrderHandler)
+	api.Put("/unuse-all", h.unuseAllHandler)
 	api.Put("/:itemID/rating", h.updateRatingHandler)
 	api.Put("/:itemID/rejected", h.updateRejectedHandler)
 	api.Put("/:itemID/used", h.updateUsedHandler)
@@ -311,6 +312,24 @@ const fallbackImage = `
     <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.96-2.36L6.5 17h11l-3.54-4.71z"/>
 </svg>
 `
+
+func (h *handler) unuseAllHandler(fCtx fiber.Ctx) error {
+	var request struct {
+		WheelID id.ID `uri:"wheelID" validate:"required"`
+	}
+
+	if err := fCtx.Bind().URI(&request); err != nil {
+		logger.Warnw(fCtx, "unuse all items, bad request", "error", err)
+		return fiber.NewError(fiber.StatusBadRequest)
+	}
+
+	if err := h.itemRepository.UnuseAllByWheelID(fCtx, request.WheelID); err != nil {
+		logger.Errorw(fCtx, "unuse all items", "error", err)
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+
+	return fCtx.SendStatus(fiber.StatusNoContent)
+}
 
 func (h *handler) getImageHandler(fCtx fiber.Ctx) error {
 	var request struct {

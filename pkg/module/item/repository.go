@@ -24,6 +24,7 @@ type Repository interface {
 	CountByWheelID(ctx context.Context, wheelID id.ID) (int, error)
 	DeleteByID(ctx context.Context, id id.ID) error
 	UpdateOrder(ctx context.Context, ids []id.ID) error
+	UnuseAllByWheelID(ctx context.Context, wheelID id.ID) error
 }
 
 type repository struct {
@@ -389,6 +390,56 @@ func (r *repository) UpdateOrder(_ context.Context, ids []id.ID) error {
 			}
 		}
 		return nil
+	})
+}
+
+func (r *repository) UnuseAllByWheelID(_ context.Context, wheelID id.ID) error {
+	return r.db.Update(func(tx *bolt.Tx) error {
+		wheels := tx.Bucket([]byte("wheels"))
+		if wheels == nil {
+			return nil
+		}
+
+		wheel := wheels.Bucket([]byte(wheelID.String()))
+		if wheel == nil {
+			return nil
+		}
+
+		items := wheel.Bucket([]byte("items"))
+		if items == nil {
+			return nil
+		}
+
+		return items.ForEachBucket(func(k []byte) error {
+			itemBucket := items.Bucket(k)
+			data := itemBucket.Get([]byte("model"))
+			if data == nil {
+				return nil
+			}
+
+			var model Model
+			if err := json.Unmarshal(data, &model); err != nil {
+				return fmt.Errorf("unmarshal model: %w", err)
+			}
+
+			if !model.Used {
+				return nil
+			}
+
+			model.Used = false
+			model.UpdatedAt = time.Now()
+
+			newData, err := json.Marshal(model)
+			if err != nil {
+				return fmt.Errorf("marshal model: %w", err)
+			}
+
+			if err = itemBucket.Put([]byte("model"), newData); err != nil {
+				return fmt.Errorf("put model: %w", err)
+			}
+
+			return nil
+		})
 	})
 }
 
