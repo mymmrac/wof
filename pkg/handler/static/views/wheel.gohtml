@@ -213,86 +213,101 @@
                             </div>
                         </div>
 
-                        <!-- Update Button -->
-                        <div x-data="updateItemForm(item, wheelId)">
-                            <button @click="open = true" type="button"
-                                    class="group/btn relative px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 text-white font-semibold cursor-pointer">
+                        <!-- Actions -->
+                        <div class="flex items-center gap-2">
+                            <!-- Update Button -->
+                            <div x-data="updateItemForm(item, wheelId)">
+                                <button @click="open = true" type="button"
+                                        class="group/btn relative px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 text-white font-semibold cursor-pointer">
+                                    <span class="relative z-10 flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                        Update
+                                    </span>
+                                </button>
+
+                                <template x-teleport="body">
+                                    <div x-show="open" x-transition.opacity @click.self="open = false"
+                                         style="display: none;"
+                                         class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                                        <div x-show="open" x-transition @keydown.escape.window="open = false"
+                                             class="glass-effect rounded-3xl shadow-2xl max-w-lg w-full p-8 relative">
+                                            <form @submit.prevent="await update(); refreshImage(item.id); await loadItems()">
+                                                <div class="flex justify-between items-center border-b border-gray-200 pb-6 mb-6">
+                                                    <h2 class="text-2xl font-bold text-gray-800">Update Item</h2>
+                                                    <button @click="open = false" type="button"
+                                                            class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full cursor-pointer">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                             viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                  stroke-width="2"
+                                                                  d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+
+                                                <div class="space-y-6">
+                                                    <div class="space-y-2">
+                                                        <label :for="'update-item-name-' + item.id"
+                                                               class="text-sm font-semibold text-gray-700 block">Item
+                                                            Name</label>
+                                                        <input x-model="name" type="text" :id="'update-item-name-' + item.id"
+                                                               placeholder="Enter item name"
+                                                               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50">
+                                                    </div>
+
+                                                    <div class="space-y-2">
+                                                        <label :for="'update-item-path-' + item.id"
+                                                               class="text-sm font-semibold text-gray-700 block">Item
+                                                            Image</label>
+                                                        <input x-ref="image" type="file" :id="'update-item-path-' + item.id"
+                                                               accept="image/*"
+                                                               placeholder="Select item image"
+                                                               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50"
+                                                               :disabled="removeImage">
+                                                    </div>
+
+                                                    <div class="flex items-center gap-2">
+                                                        <input x-model="removeImage" type="checkbox" :id="'remove-item-image-' + item.id"
+                                                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-all duration-200 cursor-pointer">
+                                                        <label :for="'remove-item-image-' + item.id"
+                                                               class="text-sm font-semibold text-gray-700 cursor-pointer">Remove
+                                                            Image</label>
+                                                    </div>
+
+                                                    <p x-show="error" x-text="error"
+                                                       class="text-red-500 text-sm bg-red-50 p-3 rounded-lg"></p>
+                                                </div>
+
+                                                <div class="mt-8 flex gap-4">
+                                                    <button @click="open = false" type="button"
+                                                            class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors duration-200 font-medium cursor-pointer">
+                                                        Cancel
+                                                    </button>
+                                                    <button type="submit"
+                                                            class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold cursor-pointer">
+                                                        Update Item
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Delete Button -->
+                            <button type="button" @click="await deleteItem(item.id)"
+                                    class="group/btn relative px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 text-white font-semibold cursor-pointer">
                                 <span class="relative z-10 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                     </svg>
-                                    Update
+                                    Delete
                                 </span>
                             </button>
-
-                            <template x-teleport="body">
-                                <div x-show="open" x-transition.opacity @click.self="open = false"
-                                     style="display: none;"
-                                     class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                                    <div x-show="open" x-transition @keydown.escape.window="open = false"
-                                         class="glass-effect rounded-3xl shadow-2xl max-w-lg w-full p-8 relative">
-                                        <form @submit.prevent="await update(); refreshImage(item.id); await loadItems()">
-                                            <div class="flex justify-between items-center border-b border-gray-200 pb-6 mb-6">
-                                                <h2 class="text-2xl font-bold text-gray-800">Update Item</h2>
-                                                <button @click="open = false" type="button"
-                                                        class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full cursor-pointer">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                         viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                              stroke-width="2"
-                                                              d="M6 18L18 6M6 6l12 12"></path>
-                                                    </svg>
-                                                </button>
-                                            </div>
-
-                                            <div class="space-y-6">
-                                                <div class="space-y-2">
-                                                    <label :for="'update-item-name-' + item.id"
-                                                           class="text-sm font-semibold text-gray-700 block">Item
-                                                        Name</label>
-                                                    <input x-model="name" type="text" :id="'update-item-name-' + item.id"
-                                                           placeholder="Enter item name"
-                                                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50">
-                                                </div>
-
-                                                <div class="space-y-2">
-                                                    <label :for="'update-item-path-' + item.id"
-                                                           class="text-sm font-semibold text-gray-700 block">Item
-                                                        Image</label>
-                                                    <input x-ref="image" type="file" :id="'update-item-path-' + item.id"
-                                                           accept="image/*"
-                                                           placeholder="Select item image"
-                                                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50"
-                                                           :disabled="removeImage">
-                                                </div>
-
-                                                <div class="flex items-center gap-2">
-                                                    <input x-model="removeImage" type="checkbox" :id="'remove-item-image-' + item.id"
-                                                           class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-all duration-200 cursor-pointer">
-                                                    <label :for="'remove-item-image-' + item.id"
-                                                           class="text-sm font-semibold text-gray-700 cursor-pointer">Remove
-                                                        Image</label>
-                                                </div>
-
-                                                <p x-show="error" x-text="error"
-                                                   class="text-red-500 text-sm bg-red-50 p-3 rounded-lg"></p>
-                                            </div>
-
-                                            <div class="mt-8 flex gap-4">
-                                                <button @click="open = false" type="button"
-                                                        class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors duration-200 font-medium cursor-pointer">
-                                                    Cancel
-                                                </button>
-                                                <button type="submit"
-                                                        class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold cursor-pointer">
-                                                    Update Item
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </template>
                         </div>
                     </div>
                 </div>
@@ -357,6 +372,20 @@
                         ids: this.items.map(a => a.id),
                     }),
                 })
+            },
+
+            async deleteItem(itemId) {
+                const ok = confirm("Are you sure you want to delete this item?")
+                if (!ok) {
+                    return
+                }
+
+                await fetch(`/api/wheel/${ this.wheelId }/item/${ itemId }`, {
+                    method: "DELETE",
+                    headers: {"Content-Type": "application/json"},
+                })
+
+                await this.loadItems()
             },
         }
     }
