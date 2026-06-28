@@ -1,6 +1,7 @@
 package item
 
 import (
+	"encoding/base64"
 	"slices"
 	"strings"
 	"time"
@@ -78,11 +79,22 @@ func (h *handler) createHandler(fCtx fiber.Ctx) error {
 	var request struct {
 		WheelID id.ID  `uri:"wheelID" validate:"required"`
 		Name    string `json:"name"   validate:"omitempty,min=1,max=64"`
+		Image   string `json:"image"  validate:"-"`
 	}
 
 	if err := fCtx.Bind().All(&request); err != nil {
 		logger.Warnw(fCtx, "create item, bad request", "error", err)
 		return fiber.NewError(fiber.StatusBadRequest)
+	}
+
+	var imageData []byte
+	if request.Image != "" {
+		var err error
+		imageData, err = base64.StdEncoding.DecodeString(request.Image)
+		if err != nil {
+			logger.Warnw(fCtx, "decode image", "error", err)
+			return fiber.NewError(fiber.StatusBadRequest)
+		}
 	}
 
 	count, err := h.itemRepository.CountByWheelID(fCtx, request.WheelID)
@@ -93,20 +105,29 @@ func (h *handler) createHandler(fCtx fiber.Ctx) error {
 
 	request.Name = strings.TrimSpace(request.Name)
 
+	itemID := id.New()
 	now := time.Now()
 	err = h.itemRepository.Create(fCtx, &item.Model{
-		ID:        id.New(),
+		ID:        itemID,
 		WheelID:   request.WheelID,
 		Name:      request.Name,
 		Order:     count,
 		Rating:    0,
 		Rejected:  false,
+		Used:      false,
 		CreatedAt: now,
 		UpdatedAt: now,
 	})
 	if err != nil {
 		logger.Errorw(fCtx, "create item", "error", err)
 		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+
+	if imageData != nil {
+		if err = h.itemRepository.UpdateImage(fCtx, itemID, imageData); err != nil {
+			logger.Errorw(fCtx, "update item image", "error", err)
+			return fiber.NewError(fiber.StatusInternalServerError)
+		}
 	}
 
 	return fCtx.JSON(fiber.Map{"ok": true})
