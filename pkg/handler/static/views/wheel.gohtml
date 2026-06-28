@@ -556,8 +556,11 @@
                         
                         const fill = index === this.selectedSectorIndex ? 'rgba(59, 130, 246, 0.4)' : (index % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)');
                         
-                        const textX = this.getTextX(50, 32, (index + 0.5) * sectorAngle);
-                        const textY = this.getTextY(50, 32, (index + 0.5) * sectorAngle);
+                        const textX = this.getTextX(50, 25, (index + 0.5) * sectorAngle);
+                        const textY = this.getTextY(50, 25, (index + 0.5) * sectorAngle);
+
+                        const imageX = this.getTextX(50, 38, (index + 0.5) * sectorAngle);
+                        const imageY = this.getTextY(50, 38, (index + 0.5) * sectorAngle);
                         
                         const sector = this.wheelSectors[index];
                         let name = '';
@@ -565,10 +568,16 @@
                             name = sector.name.length > 15 ? sector.name.substring(0, 12) + '...' : sector.name;
                         }
 
+                        const rotation = (index + 0.5) * sectorAngle;
+                        const imageUrl = `/api/wheel/${this.wheelId}/item/${sector.id}/image?v=${this.imageVersions[sector.id] || 0}`;
+
                         html += `
                             <g>
                                 <path d="${d}" fill="${fill}" class="transition-colors duration-300" stroke="rgba(255,255,255,0.2)" stroke-width="0.5" />
-                                <text x="${textX}" y="${textY}" fill="white" font-size="3" font-weight="bold" text-anchor="middle" dominant-baseline="middle">
+                                <g transform="rotate(${rotation}, ${imageX}, ${imageY})">
+                                    <image href="${imageUrl}" x="${imageX - 4}" y="${imageY - 4}" width="8" height="8" />
+                                </g>
+                                <text x="${textX}" y="${textY}" fill="white" font-size="2.5" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(${rotation}, ${textX}, ${textY})">
                                     ${name}
                                 </text>
                             </g>
