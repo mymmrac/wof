@@ -17,6 +17,7 @@ type Repository interface {
 	UpdateImage(ctx context.Context, id id.ID, image []byte) error
 	UpdateRating(ctx context.Context, id id.ID, rating int) error
 	UpdateRejected(ctx context.Context, id id.ID, rejected bool) error
+	UpdateUsed(ctx context.Context, id id.ID, used bool) error
 	GetByID(ctx context.Context, id id.ID) (*Model, bool, error)
 	GetImageByID(ctx context.Context, id id.ID) ([]byte, bool, error)
 	GetByWheelID(ctx context.Context, wheelID id.ID) ([]Model, error)
@@ -176,6 +177,34 @@ func (r *repository) UpdateRejected(_ context.Context, id id.ID, rejected bool) 
 		}
 
 		model.Rejected = rejected
+		model.UpdatedAt = time.Now()
+
+		data, err := json.Marshal(model)
+		if err != nil {
+			return fmt.Errorf("marshal model: %w", err)
+		}
+
+		if err = itemBucket.Put([]byte("model"), data); err != nil {
+			return fmt.Errorf("put model: %w", err)
+		}
+
+		return nil
+	})
+}
+
+func (r *repository) UpdateUsed(_ context.Context, id id.ID, used bool) error {
+	return r.db.Update(func(tx *bolt.Tx) error {
+		itemBucket, err := r.getItemBucket(tx, id)
+		if err != nil {
+			return err
+		}
+
+		var model Model
+		if err = json.Unmarshal(itemBucket.Get([]byte("model")), &model); err != nil {
+			return fmt.Errorf("unmarshal model: %w", err)
+		}
+
+		model.Used = used
 		model.UpdatedAt = time.Now()
 
 		data, err := json.Marshal(model)

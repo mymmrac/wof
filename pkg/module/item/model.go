@@ -13,6 +13,7 @@ type Model struct {
 	Order     int       `json:"order"`
 	Rating    int       `json:"rating,omitempty"`
 	Rejected  bool      `json:"rejected,omitempty"`
+	Used      bool      `json:"used,omitempty"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }

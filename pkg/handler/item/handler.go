@@ -27,6 +27,9 @@ func RegisterHandlers(router fiber.Router, itemRepository item.Repository) {
 	api.Get("/", h.getAllHandler)
 	api.Post("/", h.createHandler)
 	api.Post("/order", h.updateItemOrderHandler)
+	api.Post("/:itemID/rating", h.updateRatingHandler)
+	api.Post("/:itemID/rejected", h.updateRejectedHandler)
+	api.Post("/:itemID/used", h.updateUsedHandler)
 	api.Put("/:itemID", h.updateHandler)
 	// TODO: Get/update handler for image
 	api.Delete("/:itemID", h.deleteHandler)
@@ -135,6 +138,96 @@ func (h *handler) updateHandler(fCtx fiber.Ctx) error {
 	err = h.itemRepository.UpdateInfo(fCtx, request.ID, request.Name)
 	if err != nil {
 		logger.Errorw(fCtx, "update item", "error", err)
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+
+	return fCtx.JSON(fiber.Map{"ok": true})
+}
+
+func (h *handler) updateRatingHandler(fCtx fiber.Ctx) error {
+	var request struct {
+		WheelID id.ID `uri:"wheelID" validate:"required"`
+		ID      id.ID `uri:"itemID"  validate:"required"`
+		Rating  int   `json:"rating" validate:"min=0,max=10"`
+	}
+
+	if err := fCtx.Bind().All(&request); err != nil {
+		logger.Warnw(fCtx, "update item rating, bad request", "error", err)
+		return fiber.NewError(fiber.StatusBadRequest)
+	}
+
+	model, found, err := h.itemRepository.GetByID(fCtx, request.ID)
+	if err != nil {
+		logger.Errorw(fCtx, "get item", "error", err)
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+	if !found || model.WheelID != request.WheelID {
+		return fiber.NewError(fiber.StatusNotFound)
+	}
+
+	err = h.itemRepository.UpdateRating(fCtx, request.ID, request.Rating)
+	if err != nil {
+		logger.Errorw(fCtx, "update item rating", "error", err)
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+
+	return fCtx.JSON(fiber.Map{"ok": true})
+}
+
+func (h *handler) updateRejectedHandler(fCtx fiber.Ctx) error {
+	var request struct {
+		WheelID  id.ID `uri:"wheelID" validate:"required"`
+		ID       id.ID `uri:"itemID"  validate:"required"`
+		Rejected bool  `json:"rejected"`
+	}
+
+	if err := fCtx.Bind().All(&request); err != nil {
+		logger.Warnw(fCtx, "update item rejected, bad request", "error", err)
+		return fiber.NewError(fiber.StatusBadRequest)
+	}
+
+	model, found, err := h.itemRepository.GetByID(fCtx, request.ID)
+	if err != nil {
+		logger.Errorw(fCtx, "get item", "error", err)
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+	if !found || model.WheelID != request.WheelID {
+		return fiber.NewError(fiber.StatusNotFound)
+	}
+
+	err = h.itemRepository.UpdateRejected(fCtx, request.ID, request.Rejected)
+	if err != nil {
+		logger.Errorw(fCtx, "update item rejected", "error", err)
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+
+	return fCtx.JSON(fiber.Map{"ok": true})
+}
+
+func (h *handler) updateUsedHandler(fCtx fiber.Ctx) error {
+	var request struct {
+		WheelID id.ID `uri:"wheelID" validate:"required"`
+		ID      id.ID `uri:"itemID"  validate:"required"`
+		Used    bool  `json:"used"`
+	}
+
+	if err := fCtx.Bind().All(&request); err != nil {
+		logger.Warnw(fCtx, "update item used, bad request", "error", err)
+		return fiber.NewError(fiber.StatusBadRequest)
+	}
+
+	model, found, err := h.itemRepository.GetByID(fCtx, request.ID)
+	if err != nil {
+		logger.Errorw(fCtx, "get item", "error", err)
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+	if !found || model.WheelID != request.WheelID {
+		return fiber.NewError(fiber.StatusNotFound)
+	}
+
+	err = h.itemRepository.UpdateUsed(fCtx, request.ID, request.Used)
+	if err != nil {
+		logger.Errorw(fCtx, "update item used", "error", err)
 		return fiber.NewError(fiber.StatusInternalServerError)
 	}
 
