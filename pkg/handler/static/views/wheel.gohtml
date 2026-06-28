@@ -208,8 +208,45 @@
                                      @error="$event.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9Im5vbmUiIHZpZXdCb3g9IjAgMCAyNCAyNCIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiI+PHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBkPSJNNCAxNmw0LjU4Ni00LjU4NmExIDEgMCAwMTEuNDE0IDBMMTYgMTZtLTIuODI4LTIuODI4bDEuNDE0LTEuNDE0YTEgMSAwIDAxMS40MTQgMEwyMCAxMG0tNi00aC4wMU02IDIwaDEyYTIgMiAwIDAwMi0yVjZhMiAyIDAgMDAtMi0ySDZhMiAyIDAgMDAtMiAydjEyYTIgMiAwIDAwMiAycyIvPjwvc3ZnPg=='; $event.target.classList.add('p-4', 'text-gray-400')"
                                      class="w-full h-full object-cover">
                             </div>
-                            <div class="flex items-center gap-3">
+                            <div class="flex flex-col justify-center gap-2">
                                 <h3 class="text-xl font-semibold text-gray-800" x-text="item.name"></h3>
+                                <div class="flex items-center gap-4">
+                                    <!-- Badges -->
+                                    <div class="flex items-center gap-2">
+                                        <button @click="await toggleUsed(item)"
+                                                :class="item.used ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-400 border-gray-200'"
+                                                class="px-3 py-1 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer">
+                                            Used
+                                        </button>
+                                        <button @click="await toggleRejected(item)"
+                                                :class="item.rejected ? 'bg-red-100 text-red-700 border-red-200' : 'bg-gray-100 text-gray-400 border-gray-200'"
+                                                class="px-3 py-1 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer">
+                                            Rejected
+                                        </button>
+                                    </div>
+
+                                    <!-- Rating -->
+                                    <div class="flex items-center gap-1">
+                                        <template x-for="star in 5">
+                                            <button @click="await updateRating(item, star)"
+                                                    class="focus:outline-none transition-transform duration-200 hover:scale-125 cursor-pointer">
+                                                <svg class="w-5 h-5"
+                                                     :class="star <= item.rating ? 'text-amber-400 fill-current' : 'text-gray-300'"
+                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.175 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <button x-show="item.rating > 0" @click="await updateRating(item, 0)"
+                                                class="ml-1 text-gray-400 hover:text-red-500 transition-colors duration-200 cursor-pointer"
+                                                title="Clear rating">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -386,6 +423,33 @@
                 })
 
                 await this.loadItems()
+            },
+
+            async toggleUsed(item) {
+                item.used = !item.used
+                await fetch(`/api/wheel/${ this.wheelId }/item/${ item.id }/used`, {
+                    method: "PUT",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({used: item.used}),
+                })
+            },
+
+            async toggleRejected(item) {
+                item.rejected = !item.rejected
+                await fetch(`/api/wheel/${ this.wheelId }/item/${ item.id }/rejected`, {
+                    method: "PUT",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({rejected: item.rejected}),
+                })
+            },
+
+            async updateRating(item, rating) {
+                item.rating = rating
+                await fetch(`/api/wheel/${ this.wheelId }/item/${ item.id }/rating`, {
+                    method: "PUT",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({rating: item.rating}),
+                })
             },
         }
     }

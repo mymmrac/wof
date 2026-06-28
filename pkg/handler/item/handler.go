@@ -62,6 +62,7 @@ func (h *handler) getAllHandler(fCtx fiber.Ctx) error {
 		Name     string `json:"name,omitempty"`
 		Rating   int    `json:"rating,omitempty"`
 		Rejected bool   `json:"rejected,omitempty"`
+		Used     bool   `json:"used,omitempty"`
 	}
 
 	response := make([]itemInfo, len(models))
@@ -71,6 +72,7 @@ func (h *handler) getAllHandler(fCtx fiber.Ctx) error {
 			Name:     model.Name,
 			Rating:   model.Rating,
 			Rejected: model.Rejected,
+			Used:     model.Used,
 		}
 	}
 
