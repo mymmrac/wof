@@ -103,29 +103,8 @@
                     <!-- The Wheel SVG -->
                     <div class="w-full h-full transform transition-transform duration-[4000ms] ease-[cubic-bezier(0.1,0,0.1,1)]"
                          :style="`transform: rotate(${rotation}deg)`">
-                        <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible" id="fortune-wheel" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="50" cy="50" r="48" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" />
-                            
-                            <g x-show="wheelSectors.length > 0">
-                                <template x-for="(i, index) in [...Array(wheelSectors.length).keys()]" :key="index">
-                                    <g>
-                                        <path :d="describeArc(50, 50, 46, index * (360 / (wheelSectors.length || 1)), (index + 1) * (360 / (wheelSectors.length || 1)))"
-                                              :fill="index === selectedSectorIndex ? 'rgba(59, 130, 246, 0.4)' : (index % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)')"
-                                              class="transition-colors duration-300"
-                                              stroke="rgba(255,255,255,0.2)" stroke-width="0.5" />
-                                        
-                                        <text :x="getTextX(50, 32, (index + 0.5) * (360 / (wheelSectors.length || 1)))"
-                                              :y="getTextY(50, 32, (index + 0.5) * (360 / (wheelSectors.length || 1)))"
-                                              fill="white"
-                                              font-size="3"
-                                              font-weight="bold"
-                                              text-anchor="middle"
-                                              dominant-baseline="middle"
-                                              x-text="wheelSectors[index] ? (wheelSectors[index].name.length > 15 ? wheelSectors[index].name.substring(0, 12) + '...' : wheelSectors[index].name) : ''">
-                                        </text>
-                                    </g>
-                                </template>
-                            </g>
+                        <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible" id="fortune-wheel" xmlns="http://www.w3.org/2000/svg"
+                             x-html="renderWheel()">
                         </svg>
                     </div>
                     
@@ -565,6 +544,41 @@
                         await this.toggleUsed(this.selectedItem);
                     }
                 }, 4000);
+            },
+
+            renderWheel() {
+                let html = '<circle cx="50" cy="50" r="48" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" />';
+                
+                if (this.wheelSectors.length > 0) {
+                    const sectorAngle = 360 / this.wheelSectors.length;
+                    for (let index = 0; index < this.wheelSectors.length; index++) {
+                        const startAngle = index * sectorAngle;
+                        const endAngle = (index + 1) * sectorAngle;
+                        const d = this.describeArc(50, 50, 46, startAngle, endAngle);
+                        
+                        const fill = index === this.selectedSectorIndex ? 'rgba(59, 130, 246, 0.4)' : (index % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)');
+                        
+                        const textX = this.getTextX(50, 32, (index + 0.5) * sectorAngle);
+                        const textY = this.getTextY(50, 32, (index + 0.5) * sectorAngle);
+                        
+                        const sector = this.wheelSectors[index];
+                        let name = '';
+                        if (sector && sector.name) {
+                            name = sector.name.length > 15 ? sector.name.substring(0, 12) + '...' : sector.name;
+                        }
+
+                        html += `
+                            <g>
+                                <path d="${d}" fill="${fill}" class="transition-colors duration-300" stroke="rgba(255,255,255,0.2)" stroke-width="0.5" />
+                                <text x="${textX}" y="${textY}" fill="white" font-size="3" font-weight="bold" text-anchor="middle" dominant-baseline="middle">
+                                    ${name}
+                                </text>
+                            </g>
+                        `;
+                    }
+                }
+                
+                return html;
             },
 
             polarToCartesian(centerX, centerY, radius, angleInDegrees) {
