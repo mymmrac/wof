@@ -143,7 +143,7 @@
                                 <div class="space-y-2">
                                     <label for="add-item-path" class="text-sm font-semibold text-gray-700 block">Item
                                         Image</label>
-                                    <input x-model="image" type="file" id="add-item-path" accept="image/*"
+                                    <input x-ref="image" type="file" id="add-item-path" accept="image/*"
                                            placeholder="Select item image"
                                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white/50">
                                 </div>
@@ -203,38 +203,76 @@
                         <div class="flex-1">
                             <div class="flex items-center gap-3 mb-2">
                                 <h3 class="text-xl font-semibold text-gray-800" x-text="item.name"></h3>
-                                <div class="flex gap-1">
-                                    <template x-for="method in item.methods">
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full"
-                                              :class="{
-                                                  'bg-green-100 text-green-800': method === 'GET',
-                                                  'bg-blue-100 text-blue-800': method === 'POST',
-                                                  'bg-yellow-100 text-yellow-800': method === 'PUT',
-                                                  'bg-purple-100 text-purple-800': method === 'PATCH',
-                                                  'bg-red-100 text-red-800': method === 'DELETE'
-                                              }"
-                                              x-text="method"></span>
-                                    </template>
-                                </div>
                             </div>
                             <p class="text-gray-600 font-mono text-sm" x-text="item.path"></p>
                         </div>
 
-                        <!-- Configure Button -->
-                        <a :href="`/wheel/${ wheel.id }/item/${ item.id }`">
-                            <button type="button"
+                        <!-- Update Button -->
+                        <div x-data="updateItemForm(item)">
+                            <button @click="open = true" type="button"
                                     class="group/btn relative px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 text-white font-semibold cursor-pointer">
                                 <span class="relative z-10 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
-                                    Configure
+                                    Update
                                 </span>
                             </button>
-                        </a>
+
+                            <template x-teleport="body">
+                                <div x-show="open" x-transition.opacity @click.self="open = false" style="display: none;"
+                                     class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                                    <div x-show="open" x-transition @keydown.escape.window="open = false"
+                                         class="glass-effect rounded-3xl shadow-2xl max-w-lg w-full p-8 relative">
+                                        <form @submit.prevent="await update(); await loadItems()">
+                                            <div class="flex justify-between items-center border-b border-gray-200 pb-6 mb-6">
+                                                <h2 class="text-2xl font-bold text-gray-800">Update Item</h2>
+                                                <button @click="open = false" type="button"
+                                                        class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full cursor-pointer">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                              d="M6 18L18 6M6 6l12 12"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            <div class="space-y-6">
+                                                <div class="space-y-2">
+                                                    <label for="update-item-name" class="text-sm font-semibold text-gray-700 block">Item
+                                                        Name</label>
+                                                    <input x-model="name" type="text" id="update-item-name"
+                                                           placeholder="Enter item name"
+                                                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50">
+                                                </div>
+
+                                                <div class="space-y-2">
+                                                    <label for="update-item-path" class="text-sm font-semibold text-gray-700 block">Item
+                                                        Image</label>
+                                                    <input x-ref="image" type="file" id="update-item-path" accept="image/*"
+                                                           placeholder="Select item image"
+                                                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50">
+                                                </div>
+
+                                                <p x-show="error" x-text="error"
+                                                   class="text-red-500 text-sm bg-red-50 p-3 rounded-lg"></p>
+                                            </div>
+
+                                            <div class="mt-8 flex gap-4">
+                                                <button @click="open = false" type="button"
+                                                        class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors duration-200 font-medium cursor-pointer">
+                                                    Cancel
+                                                </button>
+                                                <button type="submit"
+                                                        class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold cursor-pointer">
+                                                    Update Item
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -287,7 +325,7 @@
                 this.dragIndex = null
 
                 await fetch(`/api/wheel/${ this.wheelId }/item/order`, {
-                    method: "POST",
+                    method: "PUT",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({
                         ids: this.items.map(a => a.id),
@@ -388,9 +426,20 @@
             async create() {
                 this.error = ""
 
-                if (this.name === "" && this.image === null) {
+                if (this.name === "" && !this.$refs.image.files[0]) {
                     this.error = "Empty name and image"
                     return
+                }
+
+                let imageData = ""
+                if (this.$refs.image.files[0]) {
+                    const reader = new FileReader()
+                    const promise = new Promise((resolve, reject) => {
+                        reader.onload = () => resolve(reader.result.split(",")[1])
+                        reader.onerror = reject
+                    })
+                    reader.readAsDataURL(this.$refs.image.files[0])
+                    imageData = await promise
                 }
 
                 try {
@@ -399,7 +448,7 @@
                         headers: {"Content-Type": "application/json"},
                         body: JSON.stringify({
                             name: this.name,
-                            image: this.image,
+                            image: imageData,
                         }),
                     })
 
@@ -410,8 +459,77 @@
 
                     this.open = false
                     this.name = ""
-                    this.image = null
-                    this.methods = []
+                    this.$refs.image.value = ""
+                } catch (err) {
+                    this.error = err.message
+                }
+            },
+        }
+    }
+
+    function updateItemForm(item) {
+        return {
+            open: false,
+            itemId: item.id,
+            name: item.name,
+            error: "",
+
+            wheelId: "",
+
+            init() {
+                this.$watch("wheel", value => {
+                    this.wheelId = value.id
+                })
+            },
+
+            async update() {
+                this.error = ""
+
+                if (this.name === "" && !this.$refs.image.files[0]) {
+                    this.error = "Empty name and image"
+                    return
+                }
+
+                try {
+                    if (this.name !== item.name) {
+                        let res = await fetch(`/api/wheel/${ this.wheelId }/item/${ this.itemId }`, {
+                            method: "PUT",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({
+                                name: this.name,
+                            }),
+                        })
+
+                        if (!res.ok) {
+                            let msg = await res.text()
+                            throw new Error(msg || "Update failed")
+                        }
+                    }
+
+                    if (this.$refs.image.files[0]) {
+                        const reader = new FileReader()
+                        const promise = new Promise((resolve, reject) => {
+                            reader.onload = () => resolve(reader.result.split(",")[1])
+                            reader.onerror = reject
+                        })
+                        reader.readAsDataURL(this.$refs.image.files[0])
+                        const imageData = await promise
+
+                        let res = await fetch(`/api/wheel/${ this.wheelId }/item/${ this.itemId }/image`, {
+                            method: "PUT",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({
+                                image: imageData,
+                            }),
+                        })
+
+                        if (!res.ok) {
+                            let msg = await res.text()
+                            throw new Error(msg || "Image update failed")
+                        }
+                    }
+
+                    this.open = false
                 } catch (err) {
                     this.error = err.message
                 }
