@@ -202,8 +202,9 @@
                         <!-- Item Info -->
                         <div class="flex-1 flex items-center gap-4">
                             <div class="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200 shadow-sm flex items-center justify-center">
-                                <img :src="`/api/wheel/${wheelId}/item/${item.id}/image`"
+                                <img :src="`/api/wheel/${wheelId}/item/${item.id}/image?v=${imageVersions[item.id] || 0}`"
                                      :alt="item.name"
+                                     @load="$event.target.classList.remove('p-4', 'text-gray-400')"
                                      @error="$event.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9Im5vbmUiIHZpZXdCb3g9IjAgMCAyNCAyNCIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiI+PHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBkPSJNNCAxNmw0LjU4Ni00LjU4NmExIDEgMCAwMTEuNDE0IDBMMTYgMTZtLTIuODI4LTIuODI4bDEuNDE0LTEuNDE0YTEgMSAwIDAxMS40MTQgMEwyMCAxMG0tNi00aC4wMU02IDIwaDEyYTIgMiAwIDAwMi0yVjZhMiAyIDAgMDAtMi0ySDZhMiAyIDAgMDAtMiAydjEyYTIgMiAwIDAwMiAycyIvPjwvc3ZnPg=='; $event.target.classList.add('p-4', 'text-gray-400')"
                                      class="w-full h-full object-cover">
                             </div>
@@ -231,7 +232,7 @@
                                      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                                     <div x-show="open" x-transition @keydown.escape.window="open = false"
                                          class="glass-effect rounded-3xl shadow-2xl max-w-lg w-full p-8 relative">
-                                        <form @submit.prevent="await update(); await loadItems()">
+                                        <form @submit.prevent="await update(); refreshImage(item.id); await loadItems()">
                                             <div class="flex justify-between items-center border-b border-gray-200 pb-6 mb-6">
                                                 <h2 class="text-2xl font-bold text-gray-800">Update Item</h2>
                                                 <button @click="open = false" type="button"
@@ -262,7 +263,16 @@
                                                     <input x-ref="image" type="file" id="update-item-path"
                                                            accept="image/*"
                                                            placeholder="Select item image"
-                                                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50">
+                                                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50"
+                                                           :disabled="removeImage">
+                                                </div>
+
+                                                <div class="flex items-center gap-2">
+                                                    <input x-model="removeImage" type="checkbox" id="remove-item-image"
+                                                           class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-all duration-200 cursor-pointer">
+                                                    <label for="remove-item-image"
+                                                           class="text-sm font-semibold text-gray-700 cursor-pointer">Remove
+                                                        Image</label>
                                                 </div>
 
                                                 <p x-show="error" x-text="error"
@@ -310,6 +320,7 @@
 
             wheel: {},
             items: [],
+            imageVersions: {},
 
             dragIndex: null,
 
@@ -319,6 +330,10 @@
 
             async loadItems() {
                 this.items = await (await fetch(`/api/wheel/${ this.wheelId }/item`)).json()
+            },
+
+            refreshImage(itemId) {
+                this.imageVersions[itemId] = Date.now()
             },
 
             dragStart(index) {
@@ -483,6 +498,7 @@
             open: false,
             itemId: item.id,
             name: item.name,
+            removeImage: false,
             error: "",
 
             wheelId: wheelId,
@@ -490,7 +506,7 @@
             async update() {
                 this.error = ""
 
-                if (this.name === "" && !this.$refs.image.files[0]) {
+                if (this.name === "" && !this.$refs.image.files[0] && !this.removeImage) {
                     this.error = "Empty name and image"
                     return
                 }
@@ -511,20 +527,24 @@
                         }
                     }
 
-                    if (this.$refs.image.files[0]) {
-                        const reader = new FileReader()
-                        const promise = new Promise((resolve, reject) => {
-                            reader.onload = () => resolve(reader.result.split(",")[1])
-                            reader.onerror = reject
-                        })
-                        reader.readAsDataURL(this.$refs.image.files[0])
-                        const imageData = await promise
+                    if (this.$refs.image.files[0] || this.removeImage) {
+                        let imageData = ""
+                        if (!this.removeImage && this.$refs.image.files[0]) {
+                            const reader = new FileReader()
+                            const promise = new Promise((resolve, reject) => {
+                                reader.onload = () => resolve(reader.result.split(",")[1])
+                                reader.onerror = reject
+                            })
+                            reader.readAsDataURL(this.$refs.image.files[0])
+                            imageData = await promise
+                        }
 
                         let res = await fetch(`/api/wheel/${ this.wheelId }/item/${ this.itemId }/image`, {
                             method: "PUT",
                             headers: {"Content-Type": "application/json"},
                             body: JSON.stringify({
                                 image: imageData,
+                                remove: this.removeImage,
                             }),
                         })
 
@@ -535,6 +555,7 @@
                     }
 
                     this.open = false
+                    this.removeImage = false
                 } catch (err) {
                     this.error = err.message
                 }

@@ -341,9 +341,10 @@ func (h *handler) getImageHandler(fCtx fiber.Ctx) error {
 
 func (h *handler) updateImageHandler(fCtx fiber.Ctx) error {
 	var request struct {
-		WheelID id.ID  `uri:"wheelID" validate:"required"`
-		ID      id.ID  `uri:"itemID"  validate:"required"`
-		Image   string `json:"image"  validate:"required"`
+		WheelID id.ID   `uri:"wheelID" validate:"required"`
+		ID      id.ID   `uri:"itemID"  validate:"required"`
+		Image   *string `json:"image"  validate:"required_without=Remove,omitempty"`
+		Remove  bool    `json:"remove"`
 	}
 
 	if err := fCtx.Bind().All(&request); err != nil {
@@ -360,16 +361,19 @@ func (h *handler) updateImageHandler(fCtx fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusNotFound)
 	}
 
-	imageData, err := base64.StdEncoding.DecodeString(request.Image)
-	if err != nil {
-		logger.Warnw(fCtx, "decode image", "error", err)
-		return fiber.NewError(fiber.StatusBadRequest)
-	}
+	var imageData []byte
+	if !request.Remove && request.Image != nil {
+		imageData, err = base64.StdEncoding.DecodeString(*request.Image)
+		if err != nil {
+			logger.Warnw(fCtx, "decode image", "error", err)
+			return fiber.NewError(fiber.StatusBadRequest)
+		}
 
-	contentType := http.DetectContentType(imageData)
-	if !strings.HasPrefix(contentType, "image/") {
-		logger.Warnw(fCtx, "unexpected image content type", "type", contentType)
-		return fiber.NewError(fiber.StatusBadRequest)
+		contentType := http.DetectContentType(imageData)
+		if !strings.HasPrefix(contentType, "image/") {
+			logger.Warnw(fCtx, "unexpected image content type", "type", contentType)
+			return fiber.NewError(fiber.StatusBadRequest)
+		}
 	}
 
 	if err = h.itemRepository.UpdateImage(fCtx, request.ID, imageData); err != nil {
