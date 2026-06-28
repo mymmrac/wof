@@ -1,4 +1,4 @@
-FROM golang:1.26.4-alpine AS build
+FROM --platform=$BUILDPLATFORM golang:1.26.4-alpine AS build
 
 RUN apk update && apk add --no-cache ca-certificates && update-ca-certificates
 
@@ -9,7 +9,8 @@ RUN go mod download && go mod verify
 
 COPY . .
 
-RUN CGO_ENABLED=0 GO111MODULE=on go build -ldflags="-s -w" -installsuffix "static" -trimpath -o /bin/wof .
+RUN CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=$TARGETARCH \
+    go build -ldflags="-s -w" -installsuffix "static" -trimpath -o /bin/wof .
 
 FROM scratch AS release
 

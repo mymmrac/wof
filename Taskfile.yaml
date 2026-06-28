@@ -45,6 +45,11 @@ tasks:
     cmds:
       - go tool cover -func ./bin/cover.out
 
+  docker:build-push:
+    desc: "Build docker image"
+    cmds:
+      - docker buildx build --platform="linux/amd64,linux/arm64" -f Dockerfile --push -t mymmrac/wof:latest .
+
   generate:
     desc: "Generate required code"
     deps: [ install:mock ]
