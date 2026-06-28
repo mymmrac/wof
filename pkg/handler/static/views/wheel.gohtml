@@ -541,8 +541,8 @@
                 // To point at sector `randomSectors`, we need to rotate by `-(randomSectors + 0.5) * sectorAngle`
                 // But we add it to current rotation to keep it smooth.
                 
-                const targetRotation = this.rotation + (extraSpins * 360) + (360 - (randomSectors + 0.5) * sectorAngle);
-                this.rotation = targetRotation;
+                const normalizedRotation = this.rotation % 360;
+                this.rotation = this.rotation - normalizedRotation + (extraSpins * 360) + (360 - (randomSectors + 0.5) * sectorAngle);
 
                 setTimeout(async () => {
                     this.spinning = false;
