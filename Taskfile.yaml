@@ -1,0 +1,93 @@
+# To install task (https://taskfile.dev) binary run:
+#   go install github.com/go-task/task/v3/cmd/task@latest
+
+version: 3
+
+silent: true
+
+tasks:
+  pre-commit:
+    desc: "Run formatter, generator, linter and tests"
+    cmds:
+      - go mod tidy
+      - task: generate
+      - task: fmt
+      - task: lint
+      - task: test
+
+  fmt:
+    desc: "Run formatters"
+    deps: [ install:lint ]
+    cmds:
+      - golangci-lint fmt
+
+  lint:
+    desc: "Run golangci-lint"
+    deps: [ install:lint ]
+    cmds:
+      - golangci-lint run
+
+  test:
+    desc: "Run tests"
+    cmds:
+      - mkdir -p bin
+      - go test -coverprofile ./bin/cover.out $(go list ./... | grep -v /mock)
+    sources:
+      - ./**/*.go
+      - go.mod
+      - go.sum
+    generates:
+      - bin/cover.out
+
+  test:cover:
+    desc: "Run tests & show coverage"
+    deps: [ test ]
+    cmds:
+      - go tool cover -func ./bin/cover.out
+
+  generate:
+    desc: "Generate required code"
+    deps: [ install:mock ]
+    cmds:
+      - go generate ./...
+
+  vulnerability:
+    desc: "Check for vulnerabilities"
+    deps: [ install:govulncheck ]
+    cmds:
+      - govulncheck -show verbose ./...
+
+  update-dependencies:
+    desc: "Update dependencies"
+    cmds:
+      - go mod tidy
+      - go list -f "{{"{{if not (or .Main .Indirect)}}{{.Path}}{{end}}"}}" -m all | xargs go get
+      - go mod tidy
+
+  install:
+    desc: "Install all tools"
+    deps:
+      - install:lint
+      - install:mock
+      - install:govulncheck
+
+  install:lint:
+    desc: "Install golangci-lint"
+    cmds:
+      - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+    status:
+      - command -v golangci-lint
+
+  install:mock:
+    desc: "Install mockgen"
+    cmds:
+      - go install go.uber.org/mock/mockgen@latest
+    status:
+      - command -v mockgen
+
+  install:govulncheck:
+    desc: "Install govulncheck"
+    cmds:
+      - go install golang.org/x/vuln/cmd/govulncheck@latest
+    status:
+      - command -v govulncheck

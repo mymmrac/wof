@@ -9,11 +9,10 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v3"
 	bolt "go.etcd.io/bbolt"
 	"go.uber.org/zap"
-
-	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/mymmrac/wof/pkg/handler/auth"
 	"github.com/mymmrac/wof/pkg/handler/item"
