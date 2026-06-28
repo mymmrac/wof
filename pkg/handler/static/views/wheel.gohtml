@@ -249,7 +249,7 @@
     </div>
 
     <!-- Add Item Section -->
-    <div class="mb-8">
+    <div class="mb-8 flex gap-4">
         <div x-data="addItemForm()">
             <button @click="open = true"
                     class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg hover:shadow-blue-500/20 transform hover:-translate-y-0.5 transition-all duration-300 font-bold text-sm tracking-wide cursor-pointer flex items-center gap-2">
@@ -305,6 +305,79 @@
                                 <button type="submit"
                                         class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-all duration-200 font-bold text-sm cursor-pointer">
                                     Add
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div x-data="addMultipleItemsForm()">
+            <button @click="open = true"
+                    class="px-6 py-3 bg-white/5 hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/50 rounded-lg transition-all duration-300 text-gray-400 hover:text-blue-400 font-bold text-sm tracking-wide cursor-pointer flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Upload Images
+            </button>
+
+            <template x-teleport="body">
+                <div x-show="open" x-transition.opacity @click.self="open = false" style="display: none;"
+                     class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                    <div x-show="open" x-transition @keydown.escape.window="open = false"
+                         class="glass-effect rounded-xl shadow-2xl max-w-lg w-full p-8 relative border border-white/10">
+                        <form @submit.prevent="await upload(); await loadItems()">
+                            <div class="flex justify-between items-center pb-6 mb-6 accent-line">
+                                <h2 class="text-xl font-bold text-white tracking-tight">Upload Images</h2>
+                                <button @click="open = false" type="button"
+                                        class="text-gray-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-lg cursor-pointer">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div class="space-y-2">
+                                    <label for="add-multiple-items-images"
+                                           class="text-xs font-bold uppercase tracking-wider text-gray-500 block px-1">Images</label>
+                                    <input x-ref="images" type="file" id="add-multiple-items-images" accept="image/*" multiple
+                                           class="w-full px-4 py-3 border border-white/10 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-black/20 text-gray-400 file:bg-blue-600 file:border-none file:text-white file:px-3 file:py-1 file:rounded file:text-xs file:font-bold file:uppercase file:tracking-widest file:cursor-pointer hover:file:bg-blue-500">
+                                </div>
+
+                                <div class="flex items-center gap-2 px-1">
+                                    <input x-model="deriveName" type="checkbox" id="add-multiple-items-derive-name"
+                                           class="w-4 h-4 rounded border-white/10 bg-black/20 text-blue-600 focus:ring-blue-500 transition-all duration-200 cursor-pointer">
+                                    <label for="add-multiple-items-derive-name"
+                                           class="text-xs font-bold uppercase tracking-widest text-gray-500 cursor-pointer hover:text-gray-400">Derive
+                                        item name from file name</label>
+                                </div>
+
+                                <div x-show="uploading" class="space-y-2">
+                                    <div class="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-500 px-1">
+                                        <span>Uploading...</span>
+                                        <span x-text="Math.round(progress) + '%'"></span>
+                                    </div>
+                                    <div class="w-full bg-black/20 rounded-full h-1.5 overflow-hidden">
+                                        <div class="bg-blue-600 h-full transition-all duration-300" :style="`width: ${progress}%`"></div>
+                                    </div>
+                                </div>
+
+                                <p x-show="error" x-text="error"
+                                   class="text-red-400 text-sm bg-red-950/30 border border-red-500/20 p-3 rounded-lg"></p>
+                            </div>
+
+                            <div class="mt-8 flex gap-3">
+                                <button @click="open = false" type="button" :disabled="uploading"
+                                        class="flex-1 px-4 py-3 bg-white/5 text-gray-400 rounded-lg hover:bg-white/10 hover:text-white transition-all duration-200 font-bold text-sm cursor-pointer disabled:opacity-50">
+                                    Cancel
+                                </button>
+                                <button type="submit" :disabled="uploading"
+                                        class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-all duration-200 font-bold text-sm cursor-pointer disabled:opacity-50">
+                                    Upload
                                 </button>
                             </div>
                         </form>
@@ -958,6 +1031,76 @@
                     this.removeImage = false
                 } catch (err) {
                     this.error = err.message
+                }
+            },
+        }
+    }
+
+    function addMultipleItemsForm() {
+        return {
+            open: false,
+            deriveName: true,
+            error: "",
+            uploading: false,
+            progress: 0,
+
+            wheelId: "",
+
+            init() {
+                this.$watch("wheel", value => {
+                    this.wheelId = value.id
+                })
+            },
+
+            async upload() {
+                this.error = ""
+                const files = this.$refs.images.files
+                if (files.length === 0) {
+                    this.error = "No images selected"
+                    return
+                }
+
+                this.uploading = true
+                this.progress = 0
+
+                try {
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i]
+                        let name = ""
+                        if (this.deriveName) {
+                            name = file.name.replace(/\.[^/.]+$/, "")
+                        }
+
+                        const reader = new FileReader()
+                        const imageData = await new Promise((resolve, reject) => {
+                            reader.onload = () => resolve(reader.result.split(",")[1])
+                            reader.onerror = reject
+                            reader.readAsDataURL(file)
+                        })
+
+                        let res = await fetch(`/api/wheel/${ this.wheelId }/item`, {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({
+                                name: name,
+                                image: imageData,
+                            }),
+                        })
+
+                        if (!res.ok) {
+                            let msg = await res.text()
+                            throw new Error(`Failed to upload ${file.name}: ${msg || "Unknown error"}`)
+                        }
+
+                        this.progress = ((i + 1) / files.length) * 100
+                    }
+
+                    this.open = false
+                    this.$refs.images.value = ""
+                } catch (err) {
+                    this.error = err.message
+                } finally {
+                    this.uploading = false
                 }
             },
         }
