@@ -1,0 +1,78 @@
+<main class="glass-effect rounded-3xl p-12 shadow-2xl">
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+        <div class="floating-animation mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg pulse-glow">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <h1 class="text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6 leading-tight">
+            Wheel of Fortune
+        </h1>
+    </div>
+
+    <!-- Login Form -->
+    <form x-data="loginForm()" @submit.prevent="await login()">
+        <div class="space-y-6">
+            <div class="space-y-2">
+                <label for="login-password" class="text-sm font-semibold text-gray-700 block">Password</label>
+                <input x-model="password" type="password" id="login-password" placeholder="Enter password"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50">
+            </div>
+
+            <p x-show="error" x-text="error"
+               class="text-red-500 text-sm bg-red-50 p-3 rounded-lg"></p>
+        </div>
+
+        <div class="mt-8 flex gap-4">
+            <button type="submit"
+                    class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold cursor-pointer">
+                Sign In
+            </button>
+        </div>
+    </form>
+</main>
+
+<script>
+    function loginForm() {
+        return {
+            password: "",
+            error: "",
+
+            async login() {
+                this.error = ""
+
+                if (this.password === "") {
+                    this.error = "Empty password"
+                    return
+                }
+
+                try {
+                    let res = await fetch("/api/login", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({
+                            password: this.password,
+                        }),
+                    })
+
+                    if (!res.ok) {
+                        let msg = await res.text()
+                        throw new Error(msg || "Login failed")
+                    }
+
+                    let data = await res.json()
+                    console.log("Logged in:", data)
+
+                    window.location.href = "/home"
+                } catch (err) {
+                    this.error = err.message
+                }
+            },
+        }
+    }
+</script>

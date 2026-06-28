@@ -1,0 +1,422 @@
+<main x-data="wheelComponent()" x-init="await loadWheel()" class="glass-effect rounded-3xl p-12 shadow-2xl">
+    <!-- Header Section -->
+    <div class="flex justify-between items-center mb-12">
+        <div>
+            <h1 class="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2 py-2">
+                Wheel <span x-text="wheel.name" class="text-emerald-600"></span>
+            </h1>
+        </div>
+
+        <a href="/home">
+            <button type="button"
+                    class="group relative px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-white font-semibold cursor-pointer">
+                <span class="relative z-10 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"></path>
+                    </svg>
+                    Home
+                </span>
+            </button>
+        </a>
+    </div>
+
+    <!-- Wheel Management Section -->
+    <div class="mb-12">
+        <div class="flex flex-col sm:flex-row gap-4 items-center">
+            <div x-data="updateWheelForm()">
+                <button @click="open = true"
+                        class="group relative px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-white font-semibold cursor-pointer">
+                    <span class="relative z-10 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Update Wheel
+                    </span>
+                </button>
+
+                <template x-teleport="body">
+                    <div x-show="open" x-transition.opacity @click.self="open = false" style="display: none;"
+                         class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div x-show="open" x-transition @keydown.escape.window="open = false"
+                             class="glass-effect rounded-3xl shadow-2xl max-w-md w-full p-8 relative">
+                            <form @submit.prevent="await update(); await loadWheel()">
+                                <div class="flex justify-between items-center border-b border-gray-200 pb-6 mb-6">
+                                    <h2 class="text-2xl font-bold text-gray-800">Update Wheel</h2>
+                                    <button @click="open = false" type="button"
+                                            class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full cursor-pointer">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div class="space-y-6">
+                                    <div class="space-y-2">
+                                        <label for="create-wheel-name" class="text-sm font-semibold text-gray-700">Wheel
+                                            Name</label>
+                                        <input x-model="name" type="text" id="create-wheel-name"
+                                               placeholder="Enter wheel name"
+                                               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 bg-white/50">
+                                    </div>
+
+                                    <p x-show="error" x-text="error"
+                                       class="text-red-500 text-sm bg-red-50 p-3 rounded-lg"></p>
+                                </div>
+
+                                <div class="mt-8 flex gap-4">
+                                    <button @click="open = false" type="button"
+                                            class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors duration-200 font-medium cursor-pointer">
+                                        Cancel
+                                    </button>
+                                    <button type="submit"
+                                            class="flex-1 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold cursor-pointer">
+                                        Update Wheel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="text-gray-500 font-medium">or</div>
+
+            <button type="button"
+                    class="group relative px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-white font-semibold cursor-pointer"
+                    x-data="deleteWheelForm()" @click="await deleteWheel()">
+                <span class="relative z-10 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Delete Wheel
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Add Item Section -->
+    <div class="mb-12">
+        <div x-data="addItemForm()">
+            <button @click="open = true"
+                    class="group relative px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-white font-semibold text-lg cursor-pointer">
+                <span class="relative z-10 flex items-center gap-3">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Item
+                </span>
+            </button>
+
+            <template x-teleport="body">
+                <div x-show="open" x-transition.opacity @click.self="open = false" style="display: none;"
+                     class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div x-show="open" x-transition @keydown.escape.window="open = false"
+                         class="glass-effect rounded-3xl shadow-2xl max-w-lg w-full p-8 relative">
+                        <form @submit.prevent="await create(); await loadItems()">
+                            <div class="flex justify-between items-center border-b border-gray-200 pb-6 mb-6">
+                                <h2 class="text-2xl font-bold text-gray-800">Add Item</h2>
+                                <button @click="open = false" type="button"
+                                        class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full cursor-pointer">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div class="space-y-2">
+                                    <label for="add-item-name" class="text-sm font-semibold text-gray-700 block">Item
+                                        Name</label>
+                                    <input x-model="name" type="text" id="add-item-name"
+                                           placeholder="Enter item name"
+                                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white/50">
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="add-item-path" class="text-sm font-semibold text-gray-700 block">Item
+                                        Image</label>
+                                    <input x-model="image" type="file" id="add-item-path" accept="image/*"
+                                           placeholder="Select item image"
+                                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white/50">
+                                </div>
+
+                                <p x-show="error" x-text="error"
+                                   class="text-red-500 text-sm bg-red-50 p-3 rounded-lg"></p>
+                            </div>
+
+                            <div class="mt-8 flex gap-4">
+                                <button @click="open = false" type="button"
+                                        class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors duration-200 font-medium cursor-pointer">
+                                    Cancel
+                                </button>
+                                <button type="submit"
+                                        class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold cursor-pointer">
+                                    Add Item
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Items Section -->
+    <div x-init="await loadItems()">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800">Items</h2>
+            </div>
+            <div class="flex-1 h-px bg-gradient-to-r from-gray-200 to-transparent"></div>
+        </div>
+
+        <div class="space-y-4">
+            <template x-for="(item, index) in items" :key="item.id">
+                <div class="group bg-white/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 hover:border-white/40"
+                     @dragover.prevent @drop="drop(index)">
+                    <div class="flex items-center gap-4">
+                        <!-- Drag Handle -->
+                        <button type="button" draggable="true" @dragstart="dragStart(index)"
+                                class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-xl flex items-center justify-center cursor-move transition-colors duration-200"
+                                title="Drag to reorder">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M4 8h16M4 16h16"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Item Info -->
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="text-xl font-semibold text-gray-800" x-text="item.name"></h3>
+                                <div class="flex gap-1">
+                                    <template x-for="method in item.methods">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                                              :class="{
+                                                  'bg-green-100 text-green-800': method === 'GET',
+                                                  'bg-blue-100 text-blue-800': method === 'POST',
+                                                  'bg-yellow-100 text-yellow-800': method === 'PUT',
+                                                  'bg-purple-100 text-purple-800': method === 'PATCH',
+                                                  'bg-red-100 text-red-800': method === 'DELETE'
+                                              }"
+                                              x-text="method"></span>
+                                    </template>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 font-mono text-sm" x-text="item.path"></p>
+                        </div>
+
+                        <!-- Configure Button -->
+                        <a :href="`/wheel/${ wheel.id }/item/${ item.id }`">
+                            <button type="button"
+                                    class="group/btn relative px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 text-white font-semibold cursor-pointer">
+                                <span class="relative z-10 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Configure
+                                </span>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Empty state -->
+            <div x-show="items.length === 0" class="text-center py-12">
+                <div class="w-20 h-20 bg-gradient-to-br from-gray-300 to-gray-400 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">No items yet</h3>
+                <p class="text-gray-500">Add your first item to start using wheel of fortune</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    function wheelComponent() {
+        return {
+            wheelId: "{{ .WheelId }}",
+
+            wheel: {},
+            items: [],
+
+            dragIndex: null,
+
+            async loadWheel() {
+                this.wheel = await (await fetch(`/api/wheel/${ this.wheelId }`)).json()
+            },
+
+            async loadItems() {
+                this.items = await (await fetch(`/api/wheel/${ this.wheelId }/item`)).json()
+            },
+
+            dragStart(index) {
+                this.dragIndex = index
+            },
+
+            async drop(index) {
+                if (this.dragIndex === null || this.dragIndex === index) {
+                    return
+                }
+
+                const moved = this.items.splice(this.dragIndex, 1)[0]
+                this.items.splice(index, 0, moved)
+
+                this.dragIndex = null
+
+                await fetch(`/api/wheel/${ this.wheelId }/item/order`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        ids: this.items.map(a => a.id),
+                    }),
+                })
+            },
+        }
+    }
+
+    function updateWheelForm() {
+        return {
+            open: false,
+            wheelId: "",
+            name: "",
+            error: "",
+
+            init() {
+                this.$watch("wheel", value => {
+                    if (this.error !== "") {
+                        return
+                    }
+                    this.wheelId = value.id
+                    this.name = value.name
+                })
+            },
+
+            async update() {
+                this.error = ""
+
+                if (this.name === "") {
+                    this.error = "Empty name"
+                    return
+                }
+
+                try {
+                    let res = await fetch(`/api/wheel/${ this.wheelId }`, {
+                        method: "PUT",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({
+                            name: this.name,
+                        }),
+                    })
+
+                    if (!res.ok) {
+                        let msg = await res.text()
+                        throw new Error(msg || "Update failed")
+                    }
+
+                    this.open = false
+                } catch (err) {
+                    this.error = err.message
+                }
+            },
+        }
+    }
+
+    function deleteWheelForm() {
+        return {
+            wheelId: "",
+
+            init() {
+                this.$watch("wheel", value => {
+                    this.wheelId = value.id
+                })
+            },
+
+            async deleteWheel() {
+                const ok = confirm("Are you sure you want to delete this wheel?")
+                if (!ok) {
+                    return
+                }
+
+                await fetch(`/api/wheel/${ this.wheelId }`, {
+                    method: "DELETE",
+                    headers: {"Content-Type": "application/json"},
+                })
+
+                window.location.href = "/home"
+            },
+        }
+    }
+
+    function addItemForm() {
+        return {
+            open: false,
+            name: "",
+            image: null,
+            error: "",
+
+            wheelId: "",
+
+            init() {
+                this.$watch("wheel", value => {
+                    this.wheelId = value.id
+                })
+            },
+
+            async create() {
+                this.error = ""
+
+                if (this.name === "" && this.image === null) {
+                    this.error = "Empty name and image"
+                    return
+                }
+
+                try {
+                    let res = await fetch(`/api/wheel/${ this.wheelId }/item`, {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({
+                            name: this.name,
+                            image: this.image,
+                        }),
+                    })
+
+                    if (!res.ok) {
+                        let msg = await res.text()
+                        throw new Error(msg || "Creation failed")
+                    }
+
+                    this.open = false
+                    this.name = ""
+                    this.image = null
+                    this.methods = []
+                } catch (err) {
+                    this.error = err.message
+                }
+            },
+        }
+    }
+
+</script>
