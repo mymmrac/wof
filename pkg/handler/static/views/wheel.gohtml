@@ -248,19 +248,19 @@
 
                                             <div class="space-y-6">
                                                 <div class="space-y-2">
-                                                    <label for="update-item-name"
+                                                    <label :for="'update-item-name-' + item.id"
                                                            class="text-sm font-semibold text-gray-700 block">Item
                                                         Name</label>
-                                                    <input x-model="name" type="text" id="update-item-name"
+                                                    <input x-model="name" type="text" :id="'update-item-name-' + item.id"
                                                            placeholder="Enter item name"
                                                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50">
                                                 </div>
 
                                                 <div class="space-y-2">
-                                                    <label for="update-item-path"
+                                                    <label :for="'update-item-path-' + item.id"
                                                            class="text-sm font-semibold text-gray-700 block">Item
                                                         Image</label>
-                                                    <input x-ref="image" type="file" id="update-item-path"
+                                                    <input x-ref="image" type="file" :id="'update-item-path-' + item.id"
                                                            accept="image/*"
                                                            placeholder="Select item image"
                                                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50"
@@ -268,9 +268,9 @@
                                                 </div>
 
                                                 <div class="flex items-center gap-2">
-                                                    <input x-model="removeImage" type="checkbox" id="remove-item-image"
+                                                    <input x-model="removeImage" type="checkbox" :id="'remove-item-image-' + item.id"
                                                            class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-all duration-200 cursor-pointer">
-                                                    <label for="remove-item-image"
+                                                    <label :for="'remove-item-image-' + item.id"
                                                            class="text-sm font-semibold text-gray-700 cursor-pointer">Remove
                                                         Image</label>
                                                 </div>
