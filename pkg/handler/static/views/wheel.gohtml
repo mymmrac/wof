@@ -95,7 +95,7 @@
     </div>
 
     <!-- Fortune Wheel Section -->
-    <div class="mb-12 glass-effect rounded-xl p-8 border border-white/10">
+    <div class="mb-8 glass-effect rounded-xl p-8 border border-white/10">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <!-- Wheel Container -->
             <div class="relative flex flex-col items-center">
@@ -116,11 +116,21 @@
                     </div>
                 </div>
 
-                <button @click="spin()" :disabled="spinning || wheelSectors.length === 0"
-                        class="mt-8 px-10 py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 text-white rounded-full shadow-lg shadow-blue-500/20 transform hover:-translate-y-1 active:translate-y-0 transition-all duration-300 font-black text-lg uppercase tracking-widest cursor-pointer">
-                    <span x-show="!spinning">Spin Wheel</span>
-                    <span x-show="spinning">Spinning...</span>
-                </button>
+                <div class="mt-8 flex items-center gap-4">
+                    <button @click="spin()" :disabled="spinning || wheelSectors.length === 0"
+                            class="px-10 py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 text-white rounded-full shadow-lg shadow-blue-500/20 transform hover:-translate-y-1 active:translate-y-0 transition-all duration-300 font-black text-lg uppercase tracking-widest cursor-pointer">
+                        <span x-show="!spinning">Spin Wheel</span>
+                        <span x-show="spinning">Spinning...</span>
+                    </button>
+
+                    <button @click="prepareWheel()" x-show="!spinning && selectedItem"
+                            class="p-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-full border border-white/10 transition-all duration-300 cursor-pointer"
+                            title="Refresh Wheel">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <!-- Controls & Results -->
@@ -472,6 +482,7 @@
 
             rotation: 0,
             spinning: false,
+            justFinishedSpinning: false,
             sectorCount: 8,
             filterExcludeUsed: true,
             filterExcludeRejected: true,
@@ -487,7 +498,7 @@
             },
 
             prepareWheel() {
-                if (this.spinning) return;
+                if (this.spinning || this.justFinishedSpinning) return;
                 
                 let availableItems = (this.items || []).filter(item => {
                     if (this.filterExcludeUsed && item.used) return false;
@@ -510,6 +521,7 @@
                 }
                 this.wheelSectors = sectors;
                 this.selectedSectorIndex = null;
+                this.selectedItem = null;
             },
 
             async spin() {
@@ -534,6 +546,7 @@
 
                 setTimeout(async () => {
                     this.spinning = false;
+                    this.justFinishedSpinning = true;
                     this.selectedSectorIndex = randomSectors;
                     this.selectedItem = this.wheelSectors[randomSectors];
                     
@@ -541,6 +554,7 @@
                     if (!this.selectedItem.used) {
                         await this.toggleUsed(this.selectedItem);
                     }
+                    this.justFinishedSpinning = false;
                 }, 4000);
             },
 
