@@ -1,4 +1,4 @@
-<main x-data="wheelComponent()" x-init="await loadWheel()" class="glass-effect rounded-xl p-8 shadow-2xl">
+<main x-data="wheelComponent()" x-init="await loadWheel(); await loadItems()" class="glass-effect rounded-xl p-8 shadow-2xl">
     <!-- Header Section -->
     <div class="flex justify-between items-end mb-8 pb-6 border-b border-white/5">
         <div>
@@ -94,6 +94,148 @@
         </div>
     </div>
 
+    <!-- Fortune Wheel Section -->
+    <div class="mb-12 glass-effect rounded-xl p-8 border border-white/10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <!-- Wheel Container -->
+            <div class="relative flex flex-col items-center">
+                <div class="relative w-80 h-80 sm:w-96 sm:h-96">
+                    <!-- The Wheel SVG -->
+                    <div class="w-full h-full transform transition-transform duration-[4000ms] ease-[cubic-bezier(0.1,0,0.1,1)]"
+                         :style="`transform: rotate(${rotation}deg)`">
+                        <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible" id="fortune-wheel" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="48" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" />
+                            
+                            <g x-show="wheelSectors.length > 0">
+                                <template x-for="(i, index) in [...Array(wheelSectors.length).keys()]" :key="index">
+                                    <g>
+                                        <path :d="describeArc(50, 50, 46, index * (360 / (wheelSectors.length || 1)), (index + 1) * (360 / (wheelSectors.length || 1)))"
+                                              :fill="index === selectedSectorIndex ? 'rgba(59, 130, 246, 0.4)' : (index % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)')"
+                                              class="transition-colors duration-300"
+                                              stroke="rgba(255,255,255,0.2)" stroke-width="0.5" />
+                                        
+                                        <text :x="getTextX(50, 32, (index + 0.5) * (360 / (wheelSectors.length || 1)))"
+                                              :y="getTextY(50, 32, (index + 0.5) * (360 / (wheelSectors.length || 1)))"
+                                              fill="white"
+                                              font-size="3"
+                                              font-weight="bold"
+                                              text-anchor="middle"
+                                              dominant-baseline="middle"
+                                              x-text="wheelSectors[index] ? (wheelSectors[index].name.length > 15 ? wheelSectors[index].name.substring(0, 12) + '...' : wheelSectors[index].name) : ''">
+                                        </text>
+                                    </g>
+                                </template>
+                            </g>
+                        </svg>
+                    </div>
+                    
+                    <!-- Pointer -->
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 w-4 h-8 text-blue-500">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 21l-8-18h16l-8 18z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <button @click="spin()" :disabled="spinning || wheelSectors.length === 0"
+                        class="mt-8 px-10 py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 text-white rounded-full shadow-lg shadow-blue-500/20 transform hover:-translate-y-1 active:translate-y-0 transition-all duration-300 font-black text-lg uppercase tracking-widest cursor-pointer">
+                    <span x-show="!spinning">Spin Wheel</span>
+                    <span x-show="spinning">Spinning...</span>
+                </button>
+            </div>
+
+            <!-- Controls & Results -->
+            <div class="space-y-8">
+                <div class="space-y-6">
+                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        Wheel Settings
+                    </h2>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold uppercase tracking-wider text-gray-500 block px-1">Sectors</label>
+                            <input type="number" x-model.number="sectorCount" min="2" max="50"
+                                   class="w-full px-4 py-2 border border-white/10 rounded-lg bg-black/20 text-white outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold uppercase tracking-wider text-gray-500 block px-1">Filters</label>
+                        <div class="flex flex-wrap gap-3">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" x-model="filterExcludeUsed" class="hidden">
+                                <div class="w-5 h-5 rounded border border-white/10 flex items-center justify-center transition-colors group-hover:border-blue-500"
+                                     :class="filterExcludeUsed ? 'bg-blue-600 border-blue-600' : 'bg-black/20'">
+                                    <svg x-show="filterExcludeUsed" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <span class="text-sm font-medium text-gray-400 group-hover:text-gray-200">Exclude Used</span>
+                            </label>
+                            
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" x-model="filterExcludeRejected" class="hidden">
+                                <div class="w-5 h-5 rounded border border-white/10 flex items-center justify-center transition-colors group-hover:border-blue-500"
+                                     :class="filterExcludeRejected ? 'bg-blue-600 border-blue-600' : 'bg-black/20'">
+                                    <svg x-show="filterExcludeRejected" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <span class="text-sm font-medium text-gray-400 group-hover:text-gray-200">Exclude Rejected</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Item Controls -->
+                <div x-show="selectedItem" x-transition class="glass-effect rounded-xl p-6 border border-blue-500/20 bg-blue-500/5">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-16 h-16 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex-shrink-0">
+                            <img :src="selectedItem ? `/api/wheel/${wheelId}/item/${selectedItem.id}/image?v=${imageVersions[selectedItem.id] || 0}` : ''"
+                                 class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-white" x-text="selectedItem?.name"></h3>
+                            <p class="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">Winning Selection</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-6">
+                        <div class="flex items-center gap-2">
+                            <button @click="await toggleUsed(selectedItem)"
+                                    :class="selectedItem?.used ? 'bg-blue-500 text-white border-blue-500' : 'bg-white/5 text-gray-400 border-white/10'"
+                                    class="px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest border transition-all duration-200 cursor-pointer">
+                                Used
+                            </button>
+                            <button @click="await toggleRejected(selectedItem)"
+                                    :class="selectedItem?.rejected ? 'bg-red-500 text-white border-red-500' : 'bg-white/5 text-gray-400 border-white/10'"
+                                    class="px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest border transition-all duration-200 cursor-pointer">
+                                Rejected
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-1">
+                            <template x-for="star in 5">
+                                <button @click="await updateRating(selectedItem, star)"
+                                        class="focus:outline-none transition-transform duration-200 hover:scale-125 cursor-pointer">
+                                    <svg class="w-6 h-6"
+                                         :class="star <= (selectedItem?.rating || 0) ? 'text-blue-500 fill-current' : 'text-gray-700'"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.175 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                                    </svg>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Item Section -->
     <div class="mb-8">
         <div x-data="addItemForm()">
@@ -161,19 +303,19 @@
     </div>
 
     <!-- Items Section -->
-    <div x-init="await loadItems()">
+    <div>
         <div class="flex items-center gap-4 mb-8">
             <h2 class="text-xs font-black uppercase tracking-[0.2em] text-gray-500">Item Collection</h2>
             <div class="flex-1 h-px bg-white/5"></div>
         </div>
 
         <div class="space-y-3">
-            <template x-for="(item, index) in items" :key="item.id">
+            <template x-for="item in items" :key="item.id">
                 <div class="group bg-white/5 border border-white/5 hover:border-white/10 rounded-xl p-4 transition-all duration-200"
-                     @dragover.prevent @drop="drop(index)">
+                     @dragover.prevent @drop="drop(items.indexOf(item))">
                     <div class="flex items-center gap-6">
                         <!-- Drag Handle -->
-                        <button type="button" draggable="true" @dragstart="dragStart(index)"
+                        <button type="button" draggable="true" @dragstart="dragStart(items.indexOf(item))"
                                 class="w-8 h-10 flex items-center justify-center cursor-move text-gray-400 hover:text-blue-500 transition-colors"
                                 title="Reorder">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -351,12 +493,134 @@
 
             dragIndex: null,
 
+            rotation: 0,
+            spinning: false,
+            sectorCount: 8,
+            filterExcludeUsed: true,
+            filterExcludeRejected: true,
+            wheelSectors: [],
+            selectedSectorIndex: null,
+            selectedItem: null,
+
+            init() {
+                this.$watch('sectorCount', () => this.prepareWheel());
+                this.$watch('filterExcludeUsed', () => this.prepareWheel());
+                this.$watch('filterExcludeRejected', () => this.prepareWheel());
+                this.$watch('items', () => this.prepareWheel());
+            },
+
+            prepareWheel() {
+                if (this.spinning) return;
+                
+                let availableItems = (this.items || []).filter(item => {
+                    if (this.filterExcludeUsed && item.used) return false;
+                    if (this.filterExcludeRejected && item.rejected) return false;
+                    return true;
+                });
+
+                if (availableItems.length === 0) {
+                    this.wheelSectors = [];
+                    return;
+                }
+
+                // Shuffle and pick items for sectors
+                let sectors = [];
+                let pool = [...availableItems].sort(() => Math.random() - 0.5);
+                
+                const count = parseInt(this.sectorCount) || 8;
+                for (let i = 0; i < count; i++) {
+                    sectors.push(pool[i % pool.length]);
+                }
+                this.wheelSectors = sectors;
+                this.selectedSectorIndex = null;
+            },
+
+            async spin() {
+                if (this.spinning || this.wheelSectors.length === 0) return;
+
+                this.spinning = true;
+                this.selectedItem = null;
+                this.selectedSectorIndex = null;
+
+                const sectorAngle = 360 / this.wheelSectors.length;
+                const randomSectors = Math.floor(Math.random() * this.wheelSectors.length);
+                const extraSpins = 5 + Math.floor(Math.random() * 5);
+                
+                // Calculate new rotation. 
+                // Target angle should be such that the pointer (at 0 degrees/top) points to the selected sector.
+                // The wheel rotates clockwise. Sector 0 is from 0 to sectorAngle.
+                // To point at sector `randomSectors`, we need to rotate by `-(randomSectors + 0.5) * sectorAngle`
+                // But we add it to current rotation to keep it smooth.
+                
+                const targetRotation = this.rotation + (extraSpins * 360) + (360 - (randomSectors + 0.5) * sectorAngle);
+                this.rotation = targetRotation;
+
+                setTimeout(async () => {
+                    this.spinning = false;
+                    this.selectedSectorIndex = randomSectors;
+                    this.selectedItem = this.wheelSectors[randomSectors];
+                    
+                    // Automatically mark as used
+                    if (!this.selectedItem.used) {
+                        await this.toggleUsed(this.selectedItem);
+                    }
+                }, 4000);
+            },
+
+            polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+                const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+                return {
+                    x: centerX + (radius * Math.cos(angleInRadians)),
+                    y: centerY + (radius * Math.sin(angleInRadians))
+                };
+            },
+
+            describeArc(x, y, radius, startAngle, endAngle) {
+                if (isNaN(startAngle) || isNaN(endAngle)) {
+                    console.error('Invalid angles for describeArc:', startAngle, endAngle);
+                    return "";
+                }
+                // For a full circle (shouldn't happen with sectors but for safety)
+                if (endAngle - startAngle >= 359.9) {
+                    return [
+                        "M", x, y - radius,
+                        "A", radius, radius, 0, 1, 1, x, y + radius,
+                        "A", radius, radius, 0, 1, 1, x, y - radius,
+                        "Z"
+                    ].join(" ");
+                }
+                const start = this.polarToCartesian(x, y, radius, endAngle);
+                const end = this.polarToCartesian(x, y, radius, startAngle);
+                const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+                return [
+                    "M", x, y,
+                    "L", start.x, start.y,
+                    "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+                    "L", x, y,
+                    "Z"
+                ].join(" ");
+            },
+
+            getTextX(x, radius, angle) {
+                return this.polarToCartesian(x, x, radius, angle).x;
+            },
+
+            getTextY(y, radius, angle) {
+                return this.polarToCartesian(y, y, radius, angle).y;
+            },
+
             async loadWheel() {
                 this.wheel = await (await fetch(`/api/wheel/${ this.wheelId }`)).json()
             },
 
             async loadItems() {
-                this.items = await (await fetch(`/api/wheel/${ this.wheelId }/item`)).json()
+                try {
+                    const response = await fetch(`/api/wheel/${ this.wheelId }/item`);
+                    if (!response.ok) throw new Error('Failed to load items');
+                    this.items = await response.json();
+                } catch (e) {
+                    console.error('Error loading items:', e);
+                }
             },
 
             refreshImage(itemId) {
