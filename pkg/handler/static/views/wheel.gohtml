@@ -196,7 +196,7 @@
                 <div x-show="selectedItem" x-transition
                      class="glass-effect rounded-xl p-6 border border-blue-500/20 bg-blue-500/5">
                     <div class="flex items-center gap-4 mb-6">
-                        <div class="w-16 h-16 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex-shrink-0">
+                        <div class="w-16 h-16 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex-shrink-0 transition-transform duration-300 hover:scale-[2.5] hover:z-10">
                             <img :src="selectedItem ? `/api/wheel/${wheelId}/item/${selectedItem.id}/image?v=${imageVersions[selectedItem.id] || 0}` : ''"
                                  class="w-full h-full object-cover">
                         </div>
@@ -338,7 +338,7 @@
 
                         <!-- Item Info -->
                         <div class="flex-1 flex items-center gap-6">
-                            <div class="w-16 h-16 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex-shrink-0 flex items-center justify-center">
+                            <div class="w-16 h-16 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex-shrink-0 flex items-center justify-center transition-transform duration-300 hover:scale-[2.5] hover:z-10">
                                 <img :src="`/api/wheel/${wheelId}/item/${item.id}/image?v=${imageVersions[item.id] || 0}`"
                                      :alt="item.name"
                                      class="w-full h-full object-cover">
