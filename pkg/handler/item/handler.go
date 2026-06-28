@@ -2,6 +2,7 @@ package item
 
 import (
 	"encoding/base64"
+	"net/http"
 	"slices"
 	"strings"
 	"time"
@@ -32,7 +33,8 @@ func RegisterHandlers(router fiber.Router, itemRepository item.Repository) {
 	api.Post("/:itemID/rejected", h.updateRejectedHandler)
 	api.Post("/:itemID/used", h.updateUsedHandler)
 	api.Put("/:itemID", h.updateHandler)
-	// TODO: Get/update handler for image
+	api.Get("/:itemID/image", h.getImageHandler)
+	api.Put("/:itemID/image", h.updateImageHandler)
 	api.Delete("/:itemID", h.deleteHandler)
 }
 
@@ -93,6 +95,12 @@ func (h *handler) createHandler(fCtx fiber.Ctx) error {
 		imageData, err = base64.StdEncoding.DecodeString(request.Image)
 		if err != nil {
 			logger.Warnw(fCtx, "decode image", "error", err)
+			return fiber.NewError(fiber.StatusBadRequest)
+		}
+
+		contentType := http.DetectContentType(imageData)
+		if !strings.HasPrefix(contentType, "image/") {
+			logger.Warnw(fCtx, "unexpected image content type", "type", contentType)
 			return fiber.NewError(fiber.StatusBadRequest)
 		}
 	}
@@ -290,6 +298,82 @@ func (h *handler) updateItemOrderHandler(fCtx fiber.Ctx) error {
 	err = h.itemRepository.UpdateOrder(fCtx, request.IDs)
 	if err != nil {
 		logger.Errorw(fCtx, "update item order", "error", err)
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+
+	return fCtx.JSON(fiber.Map{"ok": true})
+}
+
+func (h *handler) getImageHandler(fCtx fiber.Ctx) error {
+	var request struct {
+		WheelID id.ID `uri:"wheelID" validate:"required"`
+		ID      id.ID `uri:"itemID"  validate:"required"`
+	}
+
+	if err := fCtx.Bind().URI(&request); err != nil {
+		logger.Warnw(fCtx, "get item image, bad request", "error", err)
+		return fiber.NewError(fiber.StatusBadRequest)
+	}
+
+	model, found, err := h.itemRepository.GetByID(fCtx, request.ID)
+	if err != nil {
+		logger.Errorw(fCtx, "get item", "error", err)
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+	if !found || model.WheelID != request.WheelID {
+		return fiber.NewError(fiber.StatusNotFound)
+	}
+
+	imageData, found, err := h.itemRepository.GetImageByID(fCtx, request.ID)
+	if err != nil {
+		logger.Errorw(fCtx, "get item image", "error", err)
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+	if !found {
+		return fiber.NewError(fiber.StatusNotFound)
+	}
+
+	contentType := http.DetectContentType(imageData)
+	fCtx.Set(fiber.HeaderContentType, contentType)
+
+	return fCtx.Send(imageData)
+}
+
+func (h *handler) updateImageHandler(fCtx fiber.Ctx) error {
+	var request struct {
+		WheelID id.ID  `uri:"wheelID" validate:"required"`
+		ID      id.ID  `uri:"itemID"  validate:"required"`
+		Image   string `json:"image"  validate:"required"`
+	}
+
+	if err := fCtx.Bind().All(&request); err != nil {
+		logger.Warnw(fCtx, "update item image, bad request", "error", err)
+		return fiber.NewError(fiber.StatusBadRequest)
+	}
+
+	model, found, err := h.itemRepository.GetByID(fCtx, request.ID)
+	if err != nil {
+		logger.Errorw(fCtx, "get item", "error", err)
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+	if !found || model.WheelID != request.WheelID {
+		return fiber.NewError(fiber.StatusNotFound)
+	}
+
+	imageData, err := base64.StdEncoding.DecodeString(request.Image)
+	if err != nil {
+		logger.Warnw(fCtx, "decode image", "error", err)
+		return fiber.NewError(fiber.StatusBadRequest)
+	}
+
+	contentType := http.DetectContentType(imageData)
+	if !strings.HasPrefix(contentType, "image/") {
+		logger.Warnw(fCtx, "unexpected image content type", "type", contentType)
+		return fiber.NewError(fiber.StatusBadRequest)
+	}
+
+	if err = h.itemRepository.UpdateImage(fCtx, request.ID, imageData); err != nil {
+		logger.Errorw(fCtx, "update item image", "error", err)
 		return fiber.NewError(fiber.StatusInternalServerError)
 	}
 
