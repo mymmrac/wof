@@ -1,6 +1,6 @@
 <main x-data="wheelComponent()" x-init="await loadWheel()" class="glass-effect rounded-xl p-8 shadow-2xl">
     <!-- Header Section -->
-    <div class="flex justify-between items-end mb-12 pb-6 border-b border-white/5">
+    <div class="flex justify-between items-end mb-8 pb-6 border-b border-white/5">
         <div>
             <h1 class="text-4xl font-black bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-tight">
                 Wheel <span x-text="wheel.name" class="text-blue-500"></span>
@@ -21,7 +21,7 @@
     </div>
 
     <!-- Wheel Management Section -->
-    <div class="mb-12">
+    <div class="mb-8">
         <div class="flex flex-wrap gap-4 items-center">
             <div x-data="updateWheelForm()">
                 <button @click="open = true"
@@ -95,7 +95,7 @@
     </div>
 
     <!-- Add Item Section -->
-    <div class="mb-12">
+    <div class="mb-8">
         <div x-data="addItemForm()">
             <button @click="open = true"
                     class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg hover:shadow-blue-500/20 transform hover:-translate-y-0.5 transition-all duration-300 font-bold text-sm tracking-wide cursor-pointer flex items-center gap-2">
