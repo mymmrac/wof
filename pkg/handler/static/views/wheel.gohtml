@@ -205,12 +205,12 @@
                     <div class="flex flex-wrap items-center gap-6">
                         <div class="flex items-center gap-2">
                             <button @click="await toggleUsed(selectedItem)"
-                                    :class="selectedItem?.used ? 'bg-blue-500 text-white border-blue-500' : 'bg-white/5 text-gray-400 border-white/10'"
+                                    :class="selectedItem?.used ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' : 'bg-white/5 text-gray-600 border-white/10'"
                                     class="px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest border transition-all duration-200 cursor-pointer">
                                 Used
                             </button>
                             <button @click="await toggleRejected(selectedItem)"
-                                    :class="selectedItem?.rejected ? 'bg-red-500 text-white border-red-500' : 'bg-white/5 text-gray-400 border-white/10'"
+                                    :class="selectedItem?.rejected ? 'bg-red-500/10 text-red-400 border-red-500/30' : 'bg-white/5 text-gray-600 border-white/10'"
                                     class="px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest border transition-all duration-200 cursor-pointer">
                                 Rejected
                             </button>
@@ -231,7 +231,7 @@
                             <button x-show="selectedItem?.rating > 0" @click="await updateRating(selectedItem, 0)"
                                     class="ml-2 text-gray-700 hover:text-red-400 transition-colors duration-200 cursor-pointer"
                                     title="Reset">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
