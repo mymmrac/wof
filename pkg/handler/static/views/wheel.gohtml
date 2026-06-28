@@ -1,5 +1,5 @@
 <main x-data="wheelComponent()" x-init="await loadWheel(); await loadItems()"
-      class="glass-effect rounded-xl p-8 shadow-2xl">
+      class="glass-effect rounded-xl p-8 pb-6 shadow-2xl">
     <!-- Header Section -->
     <div class="flex justify-between items-end mb-8 pb-6 border-b border-white/5">
         <div>
@@ -102,8 +102,8 @@
             <div class="relative flex flex-col items-center">
                 <div class="relative w-80 h-80 sm:w-96 sm:h-96">
                     <!-- The Wheel SVG -->
-                    <div class="w-full h-full transform transition-transform duration-[4000ms] ease-[cubic-bezier(0.1,0,0.1,1)]"
-                         :style="`transform: rotate(${rotation}deg)`">
+                    <div class="w-full h-full transform transition-transform ease-[cubic-bezier(0.1,0,0.1,1)]"
+                         :style="`transform: rotate(${rotation}deg); transition-duration: ${spinTime * 1000}ms`">
                         <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible" id="fortune-wheel"
                              xmlns="http://www.w3.org/2000/svg"
                              x-html="renderWheel()">
@@ -151,6 +151,11 @@
                         <div class="space-y-2">
                             <label class="text-xs font-bold uppercase tracking-wider text-gray-500 block px-1">Sectors</label>
                             <input type="number" x-model.number="sectorCount" min="2" max="50"
+                                   class="w-full px-4 py-2 border border-white/10 rounded-lg bg-black/20 text-white outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold uppercase tracking-wider text-gray-500 block px-1">Spin Time (s)</label>
+                            <input type="number" x-model.number="spinTime" min="1" max="20"
                                    class="w-full px-4 py-2 border border-white/10 rounded-lg bg-black/20 text-white outline-none focus:ring-1 focus:ring-blue-500">
                         </div>
                     </div>
@@ -473,7 +478,7 @@
 
             <!-- Empty state -->
             <div x-show="items.length === 0"
-                 class="py-16 text-center bg-white/5 rounded-xl border border-dashed border-white/10">
+                 class="py-16 mb-2 text-center bg-white/5 rounded-xl border border-dashed border-white/10">
                 <div class="w-16 h-16 bg-white/5 rounded-xl mx-auto mb-4 flex items-center justify-center text-gray-600">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -502,6 +507,7 @@
             spinning: false,
             justFinishedSpinning: false,
             sectorCount: 8,
+            spinTime: 4,
             filterExcludeUsed: true,
             filterExcludeRejected: true,
             wheelSectors: [],
@@ -576,7 +582,7 @@
                         await this.toggleUsed(this.selectedItem)
                     }
                     this.justFinishedSpinning = false
-                }, 4000)
+                }, this.spinTime * 1000)
             },
 
             renderWheel() {
